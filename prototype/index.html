@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+    
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="0">
+        <title>
+            AI教务系统
+        </title>
+        <link rel="stylesheet" href="css/styles.css?v=20260908-18">
+        <link rel="stylesheet" href="css/materials-library.css?v=20260908-18">
+        <style id="app-preload-visibility">#app{visibility:hidden!important}</style>
+    </head>
+    
+    <body>
+        <header class="top">
+            <div class="brand">
+                <i>
+                    ✦
+                </i>
+                AI教务系统
+            </div>
+            <nav class="topnav">
+                <a href="#home" data-global="home">
+                    ⌂ 首页
+                </a>
+                <a href="#courses" data-global="courses">
+                    ▦ 我的课程
+                </a>
+                <a href="#materials" data-global="materials">
+                    ▤ 资料库
+                </a>
+                <a href="#notifications" data-global="notifications">
+                    ♢ 消息提醒
+                    <sup>
+                        3
+                    </sup>
+                </a>
+                <a href="#settings" data-global="settings">
+                    ⚙ 系统设置
+                </a>
+            </nav>
+            <button class="user">
+                林老师⌄
+            </button>
+        </header>
+        <div id="app">
+        </div>
+        <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div class="modal-header">
+                <div>
+                    <div class="eyebrow">AI ASSISTANT</div>
+                    <h2 id="modalTitle">AI 助手</h2>
+                </div>
+                <button type="button" id="modalClose" class="icon-btn" aria-label="关闭">×</button>
+            </div>
+            <p class="muted">课程创建、内容生成和教学任务统一在这里处理。</p>
+            <div id="stream" class="stream" aria-live="polite"></div>
+            <div class="modal-bottom">
+                <button type="button" id="modalRetry" class="btn secondary">重试</button>
+                <button type="button" id="modalSave" class="btn primary">保存为草稿</button>
+            </div>
+        </div>
+        <div id="modalBg" class="modal-bg">
+        </div>
+
+
+        <script src="js/core/00-app-shell.js?v=20260908-18">
+        </script>
+        <script src="js/core/04-materials-alignment.js?v=20260908-18">
+        </script>
+        <script src="js/core/01-demo-store.js?v=20260908-18">
+        </script>
+        <script src="js/core/02-course-create.js?v=20260908-18">
+        </script>
+        <script src="js/core/03-course-processing.js?v=20260908-18">
+        </script>
+        <script src="js/core/course-v2-loader.js?v=20260908-18">
+        </script>
+    </body>
+
+</html>
