@@ -40,6 +40,8 @@
     .syllabus-col-mid .outline-section-actions{margin-top:14px;padding-top:2px}
     .syllabus-content-tree .chapter-tree{margin-bottom:6px}
     .syllabus-content-tree .syllabus-tree-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px;padding-top:12px;border-top:1px solid #edf3f2}
+    .syllabus-header-create{margin-left:4px;white-space:nowrap}
+    .outline-section-meta{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
     @media(max-width:1100px){.syllabus-col-right{position:static;height:auto!important}}
   `;
   document.head.appendChild(sylStyle);
@@ -97,7 +99,7 @@
 
     content: `# 04 课程教学内容与基本要求
 
-> 点击下方按钮可快捷“＋ 新增章节”、“↥ 导入已有大纲”或“⚙ 教学大纲模板设置”。
+> 可在下方章节树中直接新建一级、二级和三级章节；保存后会立即回写当前大纲草稿。
 
 ## 第一章 集合论基础 (8 学时)
 - **1.1 集合的基本概念**：列举法、描述法、文氏图、空集、全集与幂集。
@@ -297,13 +299,6 @@
         <button type="button" class="btn secondary" data-syl="preview" onclick="(window.__syllabusOpenPreview ? window.__syllabusOpenPreview() : alert('教学大纲预览将在正式版本中开放'))">教学大纲预览</button>
         <button type="button" class="btn secondary" data-syl="import" onclick="openImportSyllabusModal()">↥ 导入已有大纲</button>
         <button type="button" class="btn secondary" data-syl="template" onclick="openSyllabusTemplateModal()">⚙ 大纲模板设置</button>
-        <select aria-label="大纲版本" class="version-select" onchange="selectOutlineVersion(this.value)">
-          <option value="v3">v3 · 当前编辑</option>
-          <option value="v2">v2 · 已发布</option>
-          <option value="v1">v1 · 历史版本</option>
-        </select>
-        <button type="button" class="btn secondary" data-syl="draft" onclick="saveOutlineSection(window.__sylActive(), false)">保存草稿</button>
-        <button type="button" class="btn primary" data-syl="version-save" onclick="saveOutlineSection(window.__sylActive(), true)">保存版本 →</button>
       </div>
     </div>
   `;
@@ -354,7 +349,7 @@
         <div class="outline-section-meta">
           <span class="tag ${statusClass[st]}">${statusNames[st]}</span>
           ${section.id === 'content'
-            ? '<span class="tag gray" style="background:#f0f2f3;color:#76858d">章节结构视图</span>'
+            ? '<span class="tag gray" style="background:#f0f2f3;color:#76858d">章节结构视图</span><button type="button" class="btn primary syllabus-header-create" data-syl-tree-action="add" onclick="openChapterCreate(\'root\')">＋ 新建章节</button>'
             : `<div class="md-view-switch">
               <button type="button" class="btn secondary ${state.mdMode[section.id] !== 'edit' ? 'active' : ''}" onclick="toggleMdMode('${section.id}', 'preview')">📄 MD 预览</button>
               <button type="button" class="btn secondary ${state.mdMode[section.id] === 'edit' ? 'active' : ''}" onclick="toggleMdMode('${section.id}', 'edit')">✏️ 编辑源码</button>
@@ -368,7 +363,6 @@
     const index = sections.findIndex(x => x.id === id), next = sections[index + 1];
     return `
       <footer class="outline-section-actions">
-        <button type="button" class="btn secondary" onclick="saveOutlineSection('${id}', false)">保存草稿</button>
         <button type="button" class="btn primary" onclick="saveOutlineSection('${id}', true)">${next ? '保存并进入下一项 →' : '确认大纲并提交审核'}</button>
       </footer>
     `;
@@ -381,14 +375,9 @@
       return `
         <div class="syllabus-content-tree" data-md-section="${id}">
           <div class="outline-content-toolbar">
-            <small>点击任意章节进入二级编辑页；使用 ↑ ↓ 调整一级章节顺序。</small>
+            <small>点击章节可编辑；可在当前章节树中新增一级、二级和三级章节。</small>
           </div>
           <div id="syllabusTree" class="chapter-tree"></div>
-          <div class="syllabus-tree-toolbar">
-            <button type="button" class="btn secondary" data-syl-tree-action="add" onclick="window.showSyllabusToast && window.showSyllabusToast('新增章节请在右侧 AI 助手描述，或点击左侧进度栏 04 章节后使用「导入」')">＋ 新增章节</button>
-            <button type="button" class="btn secondary" onclick="openImportSyllabusModal()">↥ 导入已有大纲</button>
-            <button type="button" class="btn secondary" onclick="openSyllabusTemplateModal()">⚙ 大纲模板设置</button>
-          </div>
         </div>
       `;
     }
@@ -469,17 +458,16 @@
     [...head.children].forEach(el => {
       const t = (el.textContent || '').trim();
       let role = 'other';
-      if(el.tagName === 'SELECT') role = 'version';
+      if(el.tagName === 'SELECT') role = 'other';
       else if(t === '教学大纲预览') role = 'preview';
       else if(t.includes('导入已有大纲')) role = 'import';
       else if(t.includes('大纲模板')) role = 'template';
-      else if(t === '保存草稿') role = 'draft';
-      else if(/^保存版本/.test(t)) role = 'version-save';
+      else if(t === '保存草稿' || /^保存版本/.test(t)) { el.remove(); return; }
       if(role === 'other') other.push(el);
       else (bucket[role] = bucket[role] || []).push(el);
     });
     const chosen = {};
-    ['preview', 'import', 'template', 'draft', 'version', 'version-save'].forEach(role => {
+    ['preview', 'import', 'template'].forEach(role => {
       const arr = bucket[role];
       if(!arr || !arr.length) return;
       const keep = arr.find(el => el.dataset && el.dataset.syl) || arr[0];
@@ -488,7 +476,7 @@
     });
     // Idempotent reorder: only mutate when the current order differs, otherwise
     // every 600ms appendChild would ping the page observers (busy loop).
-    const order = ['preview', 'import', 'template', 'draft', 'version', 'version-save'];
+    const order = ['preview', 'import', 'template'];
     const expect = [...order, ...other.map(() => '__other__')].filter(r => r === '__other__' || chosen[r]);
     const actual = [...head.children].map(el => {
       const t = (el.textContent || '').trim();
@@ -534,6 +522,7 @@
      place, so accepting AI suggestions does not reset the whole chat. */
   window.__sylMdApi = {
     get: (id) => sectionMd(id || state.active),
+    all: () => sections.map(section => ({ id: section.id, title: section.title, content: sectionMd(section.id) })),
     set: (id, md) => { fields[id] = md; persist(); },
     html: (md) => renderMarkdownToHtml(md),
     active: () => state.active,
@@ -779,6 +768,7 @@
   window.openSyllabusTemplateModal = () => {
     let overlay = document.getElementById('templateModal');
     if(overlay) overlay.remove();
+    const savedTemplate = (() => { try { return JSON.parse(localStorage.getItem('ai-jiaowu-syllabus-template-config-v1') || 'null'); } catch { return null; } })();
 
     overlay = document.createElement('div');
     overlay.id = 'templateModal';
@@ -803,10 +793,10 @@
           <div class="template-card-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
             <div class="panel" style="padding:14px;border-color:var(--mint);background:var(--mint-soft)">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                <b style="font-size:14px;color:var(--ink)">标准本科教学大纲模板</b>
+                <b style="font-size:14px;color:var(--ink)">${esc(savedTemplate?.name || '标准本科教学大纲模板')}</b>
                 <span class="tag ok">默认启用</span>
               </div>
-              <p class="muted" style="font-size:11px;margin:0 0 12px;line-height:1.5">包含 01~08 完整标准结构（基本信息、课程目标、矩阵支撑、章节内容、学时分配、思政案例等）。</p>
+              <p class="muted" style="font-size:11px;margin:0 0 12px;line-height:1.5">${esc(savedTemplate?.intro || '包含 01~08 完整标准结构（基本信息、课程目标、矩阵支撑、章节内容、学时分配、思政案例等）。')}</p>
               <div style="display:flex;gap:6px">
                 <button type="button" class="btn primary" style="font-size:11px;padding:5px 9px" onclick="applySyllabusTemplate('standard')">应用此模板</button>
                 <button type="button" class="btn secondary" style="font-size:11px;padding:5px 9px" onclick="openSyllabusTemplateConfigInterface()">编辑配置</button>
@@ -850,72 +840,63 @@
     overlay.id = 'templateConfigInterfaceModal';
     overlay.className = 'kb-picker-overlay';
     overlay.setAttribute('role', 'dialog');
+    document.documentElement.classList.add('modal-lock');
+    document.body.classList.add('modal-lock');
 
-    overlay.innerHTML = `
-      <div class="kb-picker-dialog tpl-config-dialog">
-        <div class="kb-picker-head">
-          <div>
-            <span class="eyebrow">TEMPLATE CONFIGURATOR</span>
-            <h3>教学大纲模板配置界面</h3>
-          </div>
-          <button type="button" class="kb-picker-close" onclick="document.getElementById('templateConfigInterfaceModal').remove()">×</button>
-        </div>
-        <div class="tpl-config-body">
-          <div class="tpl-config-left">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-              <b style="font-size:12px;color:var(--ink)">自定义左侧大纲结构 (01~08)</b>
-              <button type="button" class="btn secondary" style="font-size:10px;padding:3px 6px" onclick="alert('已增加新自定义结构区块')">＋ 添加结构</button>
-            </div>
-            <div class="tpl-sec-list">
-              ${sections.map((s, i) => `
-                <div class="tpl-sec-item ${i===0?'active':''}" onclick="selectTplConfigSection('${s.id}')">
-                  <span><b>${s.title}</b></span>
-                  <small style="color:var(--muted)">[编辑]</small>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-          <div class="tpl-config-right">
-            <div class="panel" style="padding:14px">
-              <h4 style="margin:0 0 10px;font-size:14px">结构名称与基础属性配置</h4>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-                <label class="outline-field"><span>结构编号</span><input value="01"></label>
-                <label class="outline-field"><span>结构名称</span><input value="课程基本信息"></label>
-              </div>
-              <label class="outline-field" style="margin-bottom:10px">
-                <span>内容数据类型配置</span>
-                <select>
-                  <option selected>文本输出 (Markdown 格式)</option>
-                  <option>表格添加 / 矩阵定义</option>
-                  <option>多项选择配置</option>
-                  <option>数值约束 (学时/权重和等于1.0)</option>
-                </select>
-              </label>
-              <label class="outline-field">
-                <span>默认 Markdown 模板初始内容</span>
-                <textarea style="min-height:120px"># 01 课程基本信息&#10;&#10;## 课程概要&#10;- **课程名称**：{{course_name}}&#10;- **学时学分**：3 学分 / 48 学时</textarea>
-              </label>
-            </div>
-          </div>
-        </div>
-        <div class="kb-picker-foot">
-          <button type="button" class="btn secondary" onclick="document.getElementById('templateConfigInterfaceModal').remove()">取消</button>
-          <button type="button" class="btn primary" onclick="saveTemplateConfigInterface()">保存模板配置</button>
-        </div>
+    const stored = (() => { try { return JSON.parse(localStorage.getItem('ai-jiaowu-syllabus-template-config-v1') || 'null'); } catch { return null; } })();
+    const configSections = (Array.isArray(stored?.sections) && stored.sections.length ? stored.sections : sections.map((s, i) => ({...s, number:String(i + 1).padStart(2, '0'), type:i === 2 || i === 4 ? 'matrix' : 'markdown', required:i < 5 || i === 6, ai:i !== 7, source:i < 4 ? '主教材、课程资料库' : '教师填写'}))).map(section => ({...section, type:section.type === 'matrix' || section.type === 'hours' || section.type === 'form' ? (section.type === 'markdown' ? 'markdown' : 'matrix') : 'markdown'}));
+    window.__tplConfigSections = configSections;
+    window.__tplConfigSelected = 0;
+    overlay.innerHTML = `<div class="kb-picker-dialog tpl-config-dialog tpl-config-interface">
+      <div class="kb-picker-head tpl-config-head"><div><span class="eyebrow">TEMPLATE CONFIGURATOR / V3</span><h3>教学大纲模板配置</h3><p>定义教师看到的结构、字段和 AI 生成边界</p></div><div class="tpl-head-meta"><span class="tag ok">当前模板 · 标准本科</span><button type="button" class="kb-picker-close" onclick="closeSyllabusTemplateConfigInterface()">×</button></div></div>
+      <div class="tpl-config-summary"><div><b id="tplConfigCount">8</b><span>结构区块</span></div><div><b id="tplRequiredCount">5</b><span>必填区块</span></div><div><b>已启用</b><span>AI 辅助填充</span></div><div class="tpl-summary-note">保存后仅影响新建或复制的大纲，不会覆盖当前 v3 内容。</div></div>
+      <div class="tpl-config-body">
+        <aside class="tpl-config-left"><div class="tpl-config-left-head"><div><b>大纲结构</b><small>拖动顺序将在工作台同步</small></div><button type="button" class="btn secondary tpl-add-btn" onclick="addTplConfigSection()">＋ 添加区块</button></div><div class="tpl-sec-list" id="tplConfigSectionList"></div><div class="tpl-config-left-foot"><span class="tpl-dot"></span><span id="tplConfigFootCount">共 8 个区块</span> · 最后保存 2026-09-08</div></aside>
+        <section class="tpl-config-right"><div id="tplConfigEditor"></div><div class="tpl-live-preview"><div class="tpl-live-head"><div><span class="eyebrow">LIVE PREVIEW</span><b>工作台中的显示效果</b></div><span class="tag gray">只读预览</span></div><div id="tplConfigPreview" class="tpl-preview-paper"></div></div></section>
       </div>
-    `;
+      <div class="kb-picker-foot tpl-config-foot"><span class="tpl-save-hint">保存后将返回模板列表，可继续应用其他模板</span><div><button type="button" class="btn secondary" onclick="closeSyllabusTemplateConfigInterface()">取消</button><button type="button" class="btn primary" onclick="saveTemplateConfigInterface()">保存模板配置</button></div></div>
+    </div>`;
     document.body.appendChild(overlay);
+    renderTplConfigInterface();
   };
 
-  window.selectTplConfigSection = (id) => {
-    if(window.showSyllabusToast) window.showSyllabusToast('切换配置结构区块：' + id);
+  window.closeSyllabusTemplateConfigInterface = () => { document.getElementById('templateConfigInterfaceModal')?.remove(); document.documentElement.classList.remove('modal-lock'); document.body.classList.remove('modal-lock'); };
+
+  window.renderTplConfigInterface = () => {
+    const list = document.getElementById('tplConfigSectionList'), editor = document.getElementById('tplConfigEditor'), preview = document.getElementById('tplConfigPreview');
+    const data = window.__tplConfigSections || [], index = window.__tplConfigSelected || 0, item = data[index] || data[0];
+    if(!list || !item) return;
+    const count = document.getElementById('tplConfigCount'), required = document.getElementById('tplRequiredCount'), foot = document.getElementById('tplConfigFootCount');
+    if(count) count.textContent = String(data.length); if(required) required.textContent = String(data.filter(s => s.required).length); if(foot) foot.textContent = `共 ${data.length} 个区块`;
+    list.innerHTML = data.map((s, i) => `<button type="button" class="tpl-sec-item ${i === index ? 'active' : ''}" onclick="selectTplConfigSection(${i})"><span class="tpl-sec-index">${esc(s.number || String(i + 1).padStart(2,'0'))}</span><span class="tpl-sec-copy"><b>${esc(s.title)}</b><small>${s.required ? '必填' : '选填'} · ${s.type === 'matrix' ? '矩阵' : s.type === 'hours' ? '学时表' : 'Markdown'}</small></span><span class="tpl-sec-state">${s.ai ? 'AI' : '手动'}</span></button>`).join('');
+    const md = item.template || defaultMdFields[item.id] || `# ${item.title}`;
+    const typeLabel = item.type === 'matrix' ? '表格 / 支撑矩阵' : 'Markdown 内容';
+    editor.innerHTML = `<div class="tpl-editor-card"><div class="tpl-editor-title"><div><span class="eyebrow">SECTION ${esc(item.number || '01')}</span><h4>区块基础设置</h4></div><span class="tag gray">模板字段</span></div><div class="tpl-form-grid"><label class="outline-field"><span>结构编号</span><input data-tpl-field="number" value="${esc(item.number || '')}" maxlength="4"></label><label class="outline-field"><span>结构名称</span><input data-tpl-field="title" value="${esc(item.title || '')}" maxlength="40"></label></div><label class="outline-field"><span>内容类型</span><select data-tpl-field="type"><option value="markdown" ${item.type === 'markdown' ? 'selected' : ''}>Markdown 文本</option><option value="matrix" ${item.type === 'matrix' ? 'selected' : ''}>表格 / 支撑矩阵（Markdown）</option></select></label><label class="outline-field"><span>来源要求 <small>告诉教师和 AI 应引用哪些资料</small></span><input data-tpl-field="source" value="${esc(item.source || '')}" placeholder="例如：主教材、培养方案、课程资料库"></label>${item.type === 'matrix' ? `<div class="tpl-table-tools"><div><b>${typeLabel}定义</b><small>表头和行内容最终都会保存为 Markdown 表格</small></div><button type="button" class="btn secondary" onclick="addTplTableColumn()">＋ 增加列</button><button type="button" class="btn secondary" onclick="removeTplTableColumn()">− 删除末列</button><button type="button" class="btn secondary" onclick="addTplTableRow()">＋ 增加行</button></div><div id="tplTableBuilder" class="tpl-table-builder"></div>` : ''}<label class="outline-field"><span>默认模板内容 <small>Markdown 是最终标准，可直接编辑</small></span><textarea data-tpl-field="template" rows="8">${esc(md)}</textarea></label></div>`;
+    const rendered = renderMarkdownToHtml(md.replace(/\{\{course_name\}\}/g, '离散数学').replace(/\{\{term\}\}/g, '2026 秋季').replace(/\{\{total_hours\}\}/g, '48'));
+    preview.innerHTML = `<div class="tpl-preview-kicker">${esc(item.number || '01')} / ${esc(typeLabel)}</div><h5>${esc(item.title || '未命名区块')}</h5><div class="tpl-preview-markdown">${rendered}</div><p class="tpl-preview-source">来源要求：${esc(item.source || '未设置')}</p></div>`;
+    if(item.type === 'matrix') renderTplTableBuilder(item);
+    editor.querySelectorAll('[data-tpl-field]').forEach(input => input.addEventListener('input', () => { const key = input.dataset.tplField; item[key] = input.value; if(key === 'type'){ renderTplConfigInterface(); return; } const paper = document.getElementById('tplConfigPreview'); if(!paper) return; const title = paper.querySelector('h5'), source = paper.querySelector('.tpl-preview-source'), mdHost = paper.querySelector('.tpl-preview-markdown'); if(title) title.textContent = item.title || '未命名区块'; if(source) source.textContent = '来源要求：' + (item.source || '未设置'); if(mdHost && key === 'template') mdHost.innerHTML = renderMarkdownToHtml(input.value.replace(/\{\{course_name\}\}/g, '离散数学').replace(/\{\{term\}\}/g, '2026 秋季').replace(/\{\{total_hours\}\}/g, '48')); }));
   };
+
+  function tableData(item){ const lines=String(item.template||'').split(/\r?\n/).filter(x=>x.includes('|')); const cells=line=>line.trim().replace(/^\||\|$/g,'').split('|').map(x=>x.trim()); if(lines.length>=2)return {headers:cells(lines[0]),body:lines.slice(2).map(cells)}; return {headers:item.tableHeaders||['字段','说明'],body:item.tableRows||[['示例字段','填写内容']]}; }
+  function syncTplTable(item){ item.template='| '+item.tableHeaders.join(' | ')+' |\n| '+item.tableHeaders.map(()=> '---').join(' | ')+' |\n'+item.tableRows.map(row=>'| '+item.tableHeaders.map((_,i)=>row[i]||'').join(' | ')+' |').join('\n'); }
+  function renderTplTableBuilder(item){ const host=document.getElementById('tplTableBuilder'); if(!host)return; const data=tableData(item); item.tableHeaders=data.headers; item.tableRows=data.body; host.style.setProperty('--tpl-cols',String(data.headers.length)); host.innerHTML=`<div class="tpl-table-builder-head">${data.headers.map((h,i)=>`<input data-tpl-col="${i}" value="${esc(h)}" aria-label="第${i+1}列表头">`).join('')}<span>操作</span></div>${data.body.map((row,r)=>`<div class="tpl-table-builder-row">${data.headers.map((_,c)=>`<input data-tpl-cell="${r}:${c}" value="${esc(row[c]||'')}" aria-label="第${r+1}行第${c+1}列">`).join('')}<button type="button" class="icon-btn" onclick="removeTplTableRow(${r})">×</button></div>`).join('')}`; host.querySelectorAll('input').forEach(input=>input.addEventListener('input',()=>{if(input.dataset.tplCol!=null)item.tableHeaders[Number(input.dataset.tplCol)]=input.value;if(input.dataset.tplCell){const [r,c]=input.dataset.tplCell.split(':').map(Number);item.tableRows[r][c]=input.value;}syncTplTable(item);const md=document.querySelector('#tplConfigEditor textarea[data-tpl-field="template"]');if(md)md.value=item.template;const p=document.querySelector('#tplConfigPreview .tpl-preview-markdown');if(p)p.innerHTML=renderMarkdownToHtml(item.template)})); }
+  window.addTplTableColumn=()=>{const item=(window.__tplConfigSections||[])[window.__tplConfigSelected||0];if(!item)return;const d=tableData(item);d.headers.push('新列');d.body=d.body.map(row=>row.concat(''));item.tableHeaders=d.headers;item.tableRows=d.body;syncTplTable(item);renderTplConfigInterface();};
+  window.removeTplTableColumn=()=>{const item=(window.__tplConfigSections||[])[window.__tplConfigSelected||0];if(!item)return;const d=tableData(item);if(d.headers.length<=1)return;d.headers.pop();d.body=d.body.map(row=>row.slice(0,d.headers.length));item.tableHeaders=d.headers;item.tableRows=d.body;syncTplTable(item);renderTplConfigInterface();};
+  window.addTplTableRow=()=>{const item=(window.__tplConfigSections||[])[window.__tplConfigSelected||0];if(!item)return;const d=tableData(item);d.body.push(d.headers.map(()=>''));item.tableHeaders=d.headers;item.tableRows=d.body;syncTplTable(item);renderTplConfigInterface();};
+  window.removeTplTableRow=row=>{const item=(window.__tplConfigSections||[])[window.__tplConfigSelected||0];if(!item)return;const d=tableData(item);if(d.body.length<=1)return;d.body.splice(row,1);item.tableHeaders=d.headers;item.tableRows=d.body;syncTplTable(item);renderTplConfigInterface();};
+  window.selectTplConfigSection = index => { window.__tplConfigSelected = Number(index) || 0; renderTplConfigInterface(); };
+  window.addTplConfigSection = () => { const data = window.__tplConfigSections || []; data.push({id:'custom-'+Date.now(), number:String(data.length + 1).padStart(2,'0'), title:'新自定义区块', short:'自定义内容', status:'draft', type:'markdown', required:false, ai:true, source:'教师补充资料', template:'# 新自定义区块\n\n请填写区块内容。'}); window.__tplConfigSelected = data.length - 1; renderTplConfigInterface(); };
 
   window.saveTemplateConfigInterface = () => {
-    document.getElementById('templateConfigInterfaceModal')?.remove();
-    if(window.showSyllabusToast) window.showSyllabusToast('教学大纲模板结构配置已成功保存！');
-    rerender();
+    const data = window.__tplConfigSections || [];
+    if(data.some(item => !String(item.title || '').trim() || !String(item.number || '').trim())){ if(window.showSyllabusToast) window.showSyllabusToast('请先补全区块编号和名称'); return; }
+    let dialog = document.getElementById('templateSaveDialog');
+    if(dialog) dialog.remove();
+    dialog = document.createElement('div'); dialog.id='templateSaveDialog'; dialog.className='kb-picker-overlay'; dialog.innerHTML=`<div class="tpl-save-dialog"><div class="tpl-save-dialog-head"><div><span class="eyebrow">SAVE TEMPLATE</span><h3>保存为教学大纲模板</h3><p>给这套结构一个清晰的名称，方便课程创建时复用。</p></div><button type="button" class="kb-picker-close" onclick="document.getElementById('templateSaveDialog').remove()">×</button></div><div class="tpl-save-dialog-body"><label>模板名称<input id="tplSaveName" maxlength="40" placeholder="例如：标准本科教学大纲模板"></label><label>模板介绍<textarea id="tplSaveIntro" maxlength="200" rows="4" placeholder="例如：适用于本科课程，包含课程目标、支撑矩阵、章节学时和考核设置。"></textarea></label><div class="tpl-save-note">将保存 ${data.length} 个结构区块；当前 v3 内容不会被修改。</div></div><div class="kb-picker-foot"><button type="button" class="btn secondary" onclick="document.getElementById('templateSaveDialog').remove()">取消</button><button type="button" class="btn primary" onclick="commitSyllabusTemplateSave()">保存模板</button></div></div>`; document.body.appendChild(dialog); setTimeout(()=>document.getElementById('tplSaveName')?.focus(),0);
   };
+
+  window.commitSyllabusTemplateSave = () => { const name=document.getElementById('tplSaveName')?.value.trim(), intro=document.getElementById('tplSaveIntro')?.value.trim(); if(!name){document.getElementById('tplSaveName')?.focus();return;} try{localStorage.setItem('ai-jiaowu-syllabus-template-config-v1',JSON.stringify({template:'standard',name,intro,updatedAt:new Date().toISOString(),sections:window.__tplConfigSections||[]}));}catch{} document.getElementById('templateSaveDialog')?.remove(); closeSyllabusTemplateConfigInterface(); if(window.showSyllabusToast)window.showSyllabusToast(`模板“${name}”已保存`); setTimeout(()=>openSyllabusTemplateModal(),120); };
 
   /* AI 对话发送已移交 28-syllabus-ai-chat.js：直接在对话内生成建议并提供「接纳」回写，
      这里不再保留 Mock 逐字流式实现。 */

@@ -9,7 +9,7 @@
   style.textContent = `
     /* 页面基础与三栏布局 */
     .prep-v3-page { padding-bottom: 24px; color: var(--ink); }
-    .prep-v3-workspace { display: grid; grid-template-columns: 210px minmax(0, 1fr) 350px; gap: 16px; align-items: start; }
+    .prep-v3-workspace { display: grid; grid-template-columns: minmax(0,3fr) minmax(0,5fr) minmax(0,2fr); gap: 16px; align-items: start; }
 
     /* 顶部备课单元切换 */
     .prep-v3-header-card { background: #fff; border: 1px solid #dcece8; border-radius: 14px; padding: 14px 18px; margin-bottom: 14px; box-shadow: 0 4px 16px rgba(24,84,78,.04); }
@@ -27,7 +27,7 @@
     .prep-v3-sidebar h3 { font: 700 15px Georgia, "Microsoft YaHei", serif; margin: 0 0 10px; color: #173f40; }
 
     /* 中间 MD 编辑/预览工作区 */
-    .prep-v3-main { min-width: 0; background: #fff; border: 1px solid #e2efee; border-radius: 14px; padding: 20px; position: relative; }
+    .prep-v3-main { min-width: 0; max-height: calc(100vh - 120px); overflow-y: auto; background: #fff; border: 1px solid #e2efee; border-radius: 14px; padding: 20px; position: relative; }
     .prep-v3-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid #edf4f3; padding-bottom: 12px; margin-bottom: 16px; flex-wrap: wrap; }
     .prep-v3-mode-group { display: flex; background: #f0f6f5; padding: 3px; border-radius: 9px; gap: 2px; }
     .prep-v3-mode-btn { border: 0; background: transparent; padding: 6px 12px; border-radius: 7px; font-size: 12px; color: #577372; cursor: pointer; font-weight: 500; transition: all .14s ease; }
@@ -78,7 +78,7 @@
     .prep-diff-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
 
     /* 右侧列：备课 AI 助手 + 学术资料（Tab 切换，共用一张卡） */
-    .prep-v3-right { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+    .prep-v3-right { display: flex; flex-direction: column; gap: 14px; min-width: 0; position: sticky; top: 12px; max-height: calc(100vh - 120px); overflow: visible; }
     .prep-v3-academic { background: #fff; border: 1px solid #e2efee; border-radius: 14px; padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
 
     /* Tab 切换头 */
@@ -133,6 +133,25 @@
 
     /* 教师备注输入 */
     .prep-mat-note-box { font-size: 11px; background: #fffbe6; border: 1px solid #ffe58f; border-radius: 6px; padding: 6px 8px; color: #873800; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
+    .prep-v3-left { min-width: 0; position: sticky; top: 12px; }
+    .prep-v3-left .prep-v3-academic { max-height: calc(100vh - 120px); overflow: hidden; }
+    body:has(.prep-v3-page) { scrollbar-color: #b8dcd6 #f4faf9; scrollbar-width: thin; }
+    .prep-v3-page * { scrollbar-color: #b8dcd6 transparent; scrollbar-width: thin; }
+    .prep-v3-page *::-webkit-scrollbar { width: 6px; height: 6px; }
+    .prep-v3-page *::-webkit-scrollbar-track { background: transparent; }
+    .prep-v3-page *::-webkit-scrollbar-thumb { background: #b8dcd6; border-radius: 99px; border: 1px solid transparent; background-clip: padding-box; }
+    .prep-v3-page *::-webkit-scrollbar-thumb:hover { background: #7fc5bb; background-clip: padding-box; }
+    .prep-v3-page *::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+    .prep-source-group { display:flex; gap:5px; flex-wrap:wrap; }
+    .prep-source-group button { border:1px solid #d2e7e3; background:#fff; color:#496c6a; border-radius:7px; padding:5px 8px; font-size:10px; cursor:pointer; }
+    .prep-source-group button.active { background:#e0f5f1; border-color:#13a58f; color:#0b8d7d; font-weight:700; }
+    .prep-source-filter { border:1px solid #d2e7e3; background:#fff; color:#496c6a; border-radius:7px; padding:5px 8px; font-size:10px; cursor:pointer; }
+    .prep-source-filter.active { background:#e0f5f1; border-color:#13a58f; color:#0b8d7d; font-weight:700; }
+    .prep-material-tags { display:flex; gap:4px; flex-wrap:wrap; }
+    .prep-material-tags span { font-size:10px; color:#527473; background:#f1f7f6; border:1px solid #dcece8; border-radius:4px; padding:2px 6px; }
+    .prep-media-placeholder { display:flex; align-items:center; gap:7px; padding:10px 12px; border-radius:8px; background:#edf7f6; border:1px dashed #9edfd5; color:#0b8d7d; font-size:11px; cursor:pointer; }
+    @media(max-width:1100px){ .prep-v3-workspace{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);} .prep-v3-right{grid-column:1 / -1; position:static; max-height:none; overflow:visible;} .prep-v3-left{position:static;} .prep-v3-left .prep-v3-academic{max-height:none;} .prep-v3-main{max-height:none;overflow:visible;} }
+    @media(max-width:700px){ .prep-v3-workspace{grid-template-columns:1fr;} .prep-v3-right{grid-column:auto;} }
   `;
   // 补充样式：引用/提示块内部排版与选区反馈（保持素净）
   style.textContent += `
@@ -487,20 +506,26 @@
 
         <!-- 主体三栏布局 -->
         <div class="prep-v3-workspace">
-          <!-- 左侧：备课单元信息与检查统计 -->
-          <aside class="prep-v3-sidebar">
-            <h3>第二节 关系</h3>
-            <div style="font-size:11px;color:#527473;margin-bottom:10px;">
-              <strong>第一章 集合论基础</strong> / 6 学时
-            </div>
-            <div style="border-top:1px solid #edf4f3;padding-top:12px;">
-              <div style="font-size:11px;color:#6b8785;margin-bottom:8px;"><b>教案检查统计</b></div>
-              <div style="font-size:11px;color:#496c6a;display:grid;gap:4px;">
-                <div>大纲覆盖：<b style="color:#0b9c8c">100%</b></div>
-                <div>引用学资料：<b style="color:#0b9c8c">${materials.length} 篇</b></div>
-                <div>待核对试题：<b style="color:#c47a42">1 项</b></div>
+          <!-- 左侧：学术资料检索与知识沉淀 -->
+          <aside class="prep-v3-left">
+            <section class="prep-v3-academic">
+              <div class="prep-v3-tabs">
+                <div><h3 style="margin:0;color:#173f40;font-size:15px;">学术资料</h3><small style="color:#789490;">检索、核验并沉淀到教案</small></div>
+                <button class="btn secondary" style="font-size:10px;padding:5px 8px;" onclick="openCustomSourcesModal()">⚙️ 配置数据源</button>
               </div>
-            </div>
+              <div class="prep-academic-tools">
+                <div class="prep-scraper-input-wrap">
+                  <input id="scraperKeyword" placeholder="搜索论文、专利、教学案例…" value="二元关系 算法案例" oninput="filterAcademicMaterials(this.value)" />
+                  <button class="btn primary" style="font-size:11px;padding:6px 10px;" onclick="runAiWebScraper()">🔍 搜索</button>
+                </div>
+                <div class="prep-source-group" aria-label="数据源类型">
+                  <button class="active" onclick="setPrepSourceScope(this,'all')">全网搜索</button>
+                  ${customSources.filter(s => s.enabled && s.isPreset).map(s => `<button class="prep-source-filter" title="${s.name}" onclick="togglePrepSourceFilter(this)">${s.name}</button>`).join('')}
+                  <button onclick="openCustomSourcesModal()">＋ 添加数据源</button>
+                </div>
+              </div>
+              <div class="prep-materials-list" id="academicMaterialsList">${renderAcademicMaterialsList(materials)}</div>
+            </section>
           </aside>
 
           <!-- 中间：Markdown 工作区（实时预览模式 / 源码模式） -->
@@ -509,10 +534,7 @@
               <div class="prep-v3-mode-group">
                 <button class="prep-v3-mode-btn active" id="btnModePreview" onclick="setPrepViewMode('preview')">👁️ MD 实时预览</button>
                 <button class="prep-v3-mode-btn" id="btnModeSource" onclick="setPrepViewMode('source')">📝 MD 源码编辑</button>
-              </div>
-              <div style="display:flex;gap:6px;">
-                <button class="btn secondary" style="font-size:12px;padding:6px 10px;" onclick="triggerAiRewriteAll()">✨ AI 整体润色</button>
-                <button class="btn primary" style="font-size:12px;padding:6px 10px;" onclick="savePrepState()">💾 保存草稿</button>
+                <button class="btn primary" style="font-size:12px;padding:6px 10px;margin-left:4px;" onclick="savePrepState()">💾 保存草稿</button>
               </div>
             </div>
 
@@ -527,18 +549,13 @@
             </div>
 
             <!-- 浮动 AI 改写 Diff 效果显示区域 (点击 AI 操作后呈现) -->
-            <div id="prepDiffContainer" style="display:none;"></div>
           </main>
 
-          <!-- 右侧：AI 助手 / 学术资料（Tab 切换） -->
+          <!-- 右侧：备课 AI 助手 -->
           <aside class="prep-v3-right">
             <section class="prep-v3-academic">
-              <!-- Tab 切换头 -->
               <div class="prep-v3-tabs">
-                <div class="prep-v3-tabbar" role="tablist" aria-label="备课工具">
-                  <button id="prepTabBtnAi" class="active" role="tab" aria-selected="true" onclick="prepRightTab('ai')">🤖 AI 助手</button>
-                  <button id="prepTabBtnMat" role="tab" aria-selected="false" onclick="prepRightTab('materials')">🎓 学术资料 <span class="cnt" id="prepMatCount">${materials.length}</span></button>
-                </div>
+                <h3 style="margin:0;color:#173f40;font-size:15px;">🤖 备课 AI 助手</h3>
                 <span class="mock-chip">MOCK</span>
               </div>
 
@@ -559,26 +576,6 @@
                 <div id="prepAiStatus" class="chat-status">结果以 Markdown 草稿形式给出，可继续编辑后保存</div>
               </div>
 
-              <!-- 学术资料面板 -->
-              <div id="prepPaneMat" class="prep-v3-tab-pane">
-                <div class="prep-academic-tools">
-                  <div class="prep-scraper-input-wrap">
-                    <input id="scraperKeyword" placeholder="输入搜索主题/论文/专利/技术关键词..." value="二元关系 算法案例" />
-                    <button class="btn primary" style="font-size:11px;padding:6px 10px;" onclick="runAiWebScraper()">🔍 搜索</button>
-                  </div>
-                  <div class="prep-sources-tags" id="activeSourcesTags">
-                    ${customSources.filter(s => s.enabled).map(s => `
-                      <span class="prep-source-chip ${s.isPreset ? '' : 'custom'} active" title="${s.name}">${s.name}</span>
-                    `).join('')}
-                  </div>
-                  <div style="display:flex;justify-content:flex-end;">
-                    <button class="btn secondary" style="font-size:10px;padding:3px 8px;" onclick="openCustomSourcesModal()">⚙️ 检索源配置</button>
-                  </div>
-                </div>
-                <div class="prep-materials-list" id="academicMaterialsList">
-                  ${renderAcademicMaterialsList(materials)}
-                </div>
-              </div>
             </section>
 
             <!-- 底部提交操作区 -->
@@ -605,6 +602,8 @@
         </div>
         <div class="prep-material-title" onclick="previewAcademicMaterial('${m.id}')">${escapeHtml(m.title)}</div>
         <p class="prep-material-abstract">${escapeHtml(m.abstract)}</p>
+        <div class="prep-material-tags"><span>${escapeHtml(materialTypeLabel(m))}</span>${(m.tags || ['关系','教学应用']).map(t => `<span>#${escapeHtml(t)}</span>`).join('')}</div>
+        ${(m.type === 'video' || m.type === 'audio') ? `<div class="prep-media-placeholder" onclick="previewAcademicMaterial('${m.id}')">▶ 视频内容预览 · 点击观看</div>` : ''}
 
         ${m.note ? `<div class="prep-mat-note-box"><span>📝 <b>备注：</b>${escapeHtml(m.note)}</span><button style="border:0;background:transparent;cursor:pointer;color:#873800;" onclick="editMaterialNote('${m.id}')">✏️</button></div>` : ''}
 
@@ -625,6 +624,9 @@
   // HTML HTML转易函数
   function escapeHtml(s) {
     return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  function materialTypeLabel(m) {
+    return m.typeLabel || ({paper:'论文', text:'网页', link:'网页', pdf:'PDF', audio:'音频', video:'视频'}[m.type] || '资料');
   }
 
   /* ===================== MD 实时编辑：预览 DOM <-> Markdown 双向同步 ===================== */
@@ -940,16 +942,16 @@
 
     const toolbar = document.createElement('div');
     toolbar.id = 'prepFloatToolbar';
-    toolbar.className = 'prep-float-toolbar';
+    // 与“课程大纲”复用同一套 AI 交互视觉样式
+    toolbar.className = 'md-ai-float-bubble';
     toolbar.style.top = top + 'px';
     toolbar.style.left = left + 'px';
     toolbar.innerHTML = `
-      <button class="prep-float-btn" onclick="applyAiActionToSelection('polish', '${escapeHtml(selectedText)}')">✨ AI 润色</button>
-      <button class="prep-float-btn" onclick="applyAiActionToSelection('rewrite', '${escapeHtml(selectedText)}')">✍️ AI 改写</button>
-      <button class="prep-float-btn" onclick="applyAiActionToSelection('expand', '${escapeHtml(selectedText)}')">➕ 扩写</button>
-      <button class="prep-float-btn" onclick="applyAiActionToSelection('simplify', '${escapeHtml(selectedText)}')">✂️ 精简</button>
-      <div class="prep-float-divider"></div>
-      <button class="prep-float-btn" onclick="applyAiActionToSelection('academic', '${escapeHtml(selectedText)}')">🎓 学术表达</button>
+      <span style="font-weight:600;font-size:11px;margin-right:2px;color:#8ce0d3">AI 修改：</span>
+      <button type="button" onclick="applyAiActionToSelection('expand', '${escapeHtml(selectedText)}')">✦ 扩写</button>
+      <button type="button" onclick="applyAiActionToSelection('simplify', '${escapeHtml(selectedText)}')">✦ 简化</button>
+      <button type="button" onclick="applyAiActionToSelection('rewrite', '${escapeHtml(selectedText)}')">✦ 重写</button>
+      <button type="button" onclick="applyAiActionToSelection('polish', '${escapeHtml(selectedText)}')">✦ 润色</button>
     `;
 
     document.getElementById('prepMainWorkspace').appendChild(toolbar);
@@ -992,7 +994,10 @@
     prepPendingRange = range;
     prepPendingNewText = target.result;
     prepPendingOldText = selectedText;
-    showDiffPreview(selectedText, target.result, target.title);
+    const prompt = `请对以下教案内容进行${target.title.replace(/^AI /,'')}：\n“${selectedText}”`;
+    const input = document.getElementById('prepAiInput');
+    if (input) input.value = prompt;
+    prepAiAsk(prompt, target.result);
   };
 
   function showDiffPreview(oldText, newText, title) {
@@ -1075,7 +1080,9 @@
       return;
     }
 
-    const sources = getCustomSources().filter(s => s.enabled);
+    const configuredSources = getCustomSources().filter(s => s.enabled);
+    const selectedNames = Array.from(document.querySelectorAll('.prep-source-filter.active')).map(el => el.textContent.trim());
+    const sources = selectedNames.length ? configuredSources.filter(s => selectedNames.includes(s.name)) : configuredSources;
     const sourceNames = sources.map(s => s.name).join('、');
 
     const list = document.getElementById('academicMaterialsList');
@@ -1092,7 +1099,10 @@
       const newScrapedMaterial = {
         id: 'mat-scraped-' + Date.now(),
         title: `AI 扒取：基于“${keyword}”的专利与教学前沿分析`,
-        type: 'link',
+        type: 'video',
+        typeLabel: '视频',
+        sourceType: 'web',
+        tags: [keyword, '前沿分析', '教学案例'],
         category: 'news',
         categoryLabel: '最新资讯',
         source: sources[sources.length - 1]?.name || '中国专利网 (Patent)',
@@ -1119,7 +1129,7 @@
     const mat = mats.find(m => m.id === matId);
     if (!mat) return;
 
-    const citationMd = `\n\n> 📌 **引用学术资料**：《${mat.title}》\n> - **分类**：\`${mat.categoryLabel}\` | **数据源**：${mat.source}\n> - **抓取时间**：${mat.crawledAt} | [查看来源链接](${mat.url})\n${mat.note ? `> - **教师备注**：${mat.note}\n` : ''}\n`;
+    const citationMd = `\n\n> 📌 **引用学术资料**：《${mat.title}》\n> - **来源**：${mat.source} | **类型**：${materialTypeLabel(mat)} | **标签**：${(mat.tags || []).map(t => '#' + t).join('、') || '未标注'}\n> - **分类**：\`${mat.categoryLabel}\` | **抓取时间**：${mat.crawledAt} | [打开原网页/PDF](${mat.url})\n${mat.note ? `> - **教师备注**：${mat.note}\n` : ''}\n`;
 
     const mdContent = getMdPlan() + citationMd;
     saveMdPlan(mdContent);
@@ -1131,6 +1141,26 @@
     if (textarea) textarea.value = mdContent;
 
     alert(`已将《${mat.title}》生成的 Markdown 引用卡片成功插入教案！`);
+  };
+
+  window.filterAcademicMaterials = function(keyword) {
+    const list = document.getElementById('academicMaterialsList'); if (!list) return;
+    const q = String(keyword || '').toLowerCase();
+    const mats = getAcademicMaterials().filter(m => !q || [m.title, m.abstract, m.source, ...(m.tags || [])].join(' ').toLowerCase().includes(q));
+    list.innerHTML = renderAcademicMaterialsList(mats);
+  };
+
+  window.setPrepSourceScope = function(btn, scope) {
+    document.querySelectorAll('.prep-source-group button').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active');
+    const list = document.getElementById('academicMaterialsList'); if (!list) return;
+    const mats = getAcademicMaterials();
+    const filtered = scope === 'all' ? mats : mats.filter(m => scope === 'academic' ? /知网|万方|维普|arXiv|教育平台/.test(m.source) : scope === 'professional' ? /专利|专业/.test(m.source) : scope === 'custom' ? m.sourceType === 'custom' : scope === 'web' ? m.sourceType === 'web' : true);
+    list.innerHTML = renderAcademicMaterialsList(filtered);
+  };
+
+  window.togglePrepSourceFilter = function(btn) {
+    if (!btn) return;
+    btn.classList.toggle('active');
   };
 
   // (6) 查看学术资料多模态详情弹窗
@@ -1151,6 +1181,7 @@
         <div class="prep-edit-pane" style="padding:20px;display:grid;gap:12px;">
           <div><span class="prep-mat-tag ${mat.category}">${mat.categoryLabel}</span> <span style="font-size:12px;color:#6b8785;margin-left:8px;">来源: ${mat.source}</span></div>
           <h2 style="font-size:17px;color:#143738;margin:0;">${escapeHtml(mat.title)}</h2>
+          <div class="prep-material-tags"><span>类型：${escapeHtml(materialTypeLabel(mat))}</span>${(mat.tags || []).map(t => `<span>#${escapeHtml(t)}</span>`).join('')}</div>
           <div style="font-size:11px;color:#819b99;">抓取时间戳 (Timestamp): ${mat.crawledAt}</div>
           <div style="background:#f6faf9;border:1px solid #dcece8;padding:12px;border-radius:8px;font-size:13px;line-height:1.7;">
             <b>核心摘要/正文提取：</b><br>${escapeHtml(mat.abstract)}
@@ -1321,7 +1352,7 @@
   }
 
   // 发送一条提问（支持快捷词与输入框）
-  window.prepAiAsk = function(text) {
+  window.prepAiAsk = function(text, generatedSelectionResult) {
     const log = document.getElementById('prepAiLog');
     const input = document.getElementById('prepAiInput');
     const status = document.getElementById('prepAiStatus');
@@ -1343,7 +1374,13 @@
     log.scrollTop = log.scrollHeight;
     if (status) status.textContent = 'AI 正在生成建议…';
     setTimeout(function() {
-      pending.textContent = prepAiCannedReply(question);
+      pending.textContent = generatedSelectionResult || prepAiCannedReply(question);
+      if (generatedSelectionResult) {
+        const adopt = document.createElement('button');
+        adopt.className = 'btn primary'; adopt.style.cssText = 'font-size:11px;padding:4px 9px;margin-top:6px;';
+        adopt.textContent = '采纳到教案'; adopt.onclick = function(){ acceptDiffChange(); };
+        pending.appendChild(document.createElement('br')); pending.appendChild(adopt);
+      }
       log.scrollTop = log.scrollHeight;
       if (status) status.textContent = '建议已生成 · 可继续编辑教案或提问';
     }, 700);
