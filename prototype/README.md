@@ -6,8 +6,8 @@
 
 ## 当前版本
 
-- 缓存版本号：`20260909-46`
-- 模块数：33 个业务模块（`js/modules/`）+ 6 个核心文件（`js/core/`）
+- 缓存版本号：`20260909-47`
+- 模块数：33 个业务模块（`js/modules/`）+ 6 个核心文件（`js/core/`）；其中 `33-economics-course-data.js` 为经济学课程全模块数据适配层
 - 校验：在 `prototype/` 下运行 `node tools/dev-check.mjs`
 
 ## 页面与模块完成度
