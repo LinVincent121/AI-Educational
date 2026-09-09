@@ -10,6 +10,6 @@
     'js/modules/15-calendar-route.js', 'js/modules/16-course-basics.js', 'js/modules/17-calendar-edit-guard.js',
     'js/modules/18-calendar-final-config.js', 'js/modules/19-teaching-calendar.js', 'js/modules/20-courseware-prototype.js', 'js/modules/21-courseware-tools.js', 'js/modules/22-system-settings-calendar.js', 'js/modules/23-assignment-prototype.js', 'js/modules/24-learning-analysis.js', 'js/modules/25-learning-analysis-refinement.js', 'js/modules/26-learning-analysis-adjustments.js', 'js/modules/27-preparation-workspace.js', 'js/modules/28-syllabus-ai-chat.js', 'js/modules/30-syllabus-chapter-md.js', 'js/modules/31-syllabus-agent-review.js', 'js/modules/32-exam-reset.js'
   ];
-  const version='20260908-26';
+  const version='20260909-38';
   files.forEach((file) => document.write(`<script src="${file}?v=${version}"><\/script>`));
 })();

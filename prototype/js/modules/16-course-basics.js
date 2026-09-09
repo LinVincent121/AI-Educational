@@ -7,9 +7,10 @@
     discrete:{id:'discrete',name:'离散数学',code:'MATH203',year:'2026',term:'autumn',credits:'3',hours:'48',audience:'智能科学与技术 25 级',leader:'林老师',teachers:'张寒',nature:'专业必修',textbook:'《离散数学》（第 2 版）'},
     structure:{id:'structure',name:'数据结构',code:'CS201',year:'2026',term:'autumn',credits:'3',hours:'32',audience:'计算机类 25 级',leader:'王老师',teachers:'王老师',nature:'专业必修',textbook:'主教材尚未确认'},
     algorithm:{id:'algorithm',name:'算法设计',code:'CS305',year:'2026',term:'autumn',credits:'3',hours:'32',audience:'计算机类 24 级',leader:'王老师',teachers:'王老师',nature:'专业必修',textbook:'主教材尚未确认'},
-    database:{id:'database',name:'数据库原理',code:'CS202',year:'2025',term:'autumn',credits:'3',hours:'48',audience:'计算机类 24 级',leader:'林老师',teachers:'林老师',nature:'专业必修',textbook:'主教材已归档'}
+    database:{id:'database',name:'数据库原理',code:'CS202',year:'2025',term:'autumn',credits:'3',hours:'48',audience:'计算机类 24 级',leader:'林老师',teachers:'林老师',nature:'专业必修',textbook:'主教材已归档'},
+    economics:{id:'economics',name:'经济学原理',code:'ECON101',year:'2026',term:'autumn',credits:'3',hours:'48',audience:'经济学与管理类 25 级',leader:'林老师',teachers:'林老师',nature:'专业必修',textbook:'《经济学原理》（第 8 版）'}
   };
-  const nameToId={'离散数学':'discrete','数据结构':'structure','算法设计':'algorithm','数据库原理':'database'};
+  const nameToId={'离散数学':'discrete','数据结构':'structure','算法设计':'algorithm','数据库原理':'database','经济学原理':'economics'};
   const esc=value=>String(value==null?'':value).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const readStore=()=>{try{return JSON.parse(localStorage.getItem(STORAGE)||'{}')||{}}catch{return {}}};
   const getCourse=id=>Object.assign({},defaults[id]||{id},readStore()[id]||{});
@@ -52,7 +53,18 @@
   };
   const decorate=()=>{
     if(location.hash!=='#courses')return;
+    const cards=[...document.querySelectorAll('#courseCards .course-tile')];
+    cards.filter(card=>(card.dataset.courseId||nameToId[(card.querySelector('h2')||{}).textContent.trim()])!=='discrete').forEach(card=>card.remove());
+    const discrete=document.querySelector('#courseCards .course-tile');
+    if(discrete&&!document.querySelector('#courseCards .course-tile[data-course-id="economics"]')){
+      const economics=discrete.cloneNode(true); economics.dataset.courseId='economics'; economics.dataset.name='经济学原理'; economics.dataset.courseEditorBound='';
+      const title=economics.querySelector('h2'); if(title)title.textContent='经济学原理';
+      const code=economics.querySelector('.tile-top .muted'); if(code)code.textContent='ECON101';
+      const button=economics.querySelector('button'); if(button)button.textContent='进入课程 →';
+      document.getElementById('courseCards').appendChild(economics);
+    }
     document.querySelectorAll('#courseCards .course-tile').forEach(bindCard);
+    const count=document.getElementById('courseCount');if(count)count.textContent=document.querySelectorAll('#courseCards .course-tile').length;
     if(window.filterCourses)window.filterCourses();
   };
 
@@ -88,7 +100,7 @@
   const previousBg= document.getElementById('modalBg')&&document.getElementById('modalBg').onclick;
   if(document.getElementById('modalBg'))document.getElementById('modalBg').onclick=function(event){if(modal()&&modal().classList.contains('course-edit-open'))return;return previousBg&&previousBg.call(this,event)};
   const syncCourseSwitcher=()=>{
-    const ids=['discrete','structure','algorithm','database'],wrap=document.getElementById('courseSwitch');
+    const ids=['discrete','economics'],wrap=document.getElementById('courseSwitch');
     if(!wrap)return;
     wrap.querySelectorAll('.course-option').forEach((button,index)=>{const data=getCourse(ids[index]);if(!data)return;const name=button.querySelector('b'),meta=button.querySelector('small');if(name)name.textContent=data.name;if(meta)meta.textContent=data.code+' · '+data.year+' '+(termLabels[data.term]||data.term);button.setAttribute('aria-label',data.name+' '+data.code)});
     const currentName=wrap.closest('.side-course-switch')&&wrap.closest('.side-course-switch').querySelector('.side-current-course strong');if(currentName){const id=(()=>{try{return localStorage.getItem('ai-jiaowu-current-course')||'discrete'}catch{return 'discrete'}})();currentName.textContent=getCourse(id).name}
