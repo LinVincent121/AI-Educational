@@ -6,7 +6,7 @@
 
 ## 当前版本
 
-- 缓存版本号：`20260909-47`
+- 缓存版本号：`20260910-04`
 - 模块数：33 个业务模块（`js/modules/`）+ 6 个核心文件（`js/core/`）；其中 `33-economics-course-data.js` 为经济学课程全模块数据适配层
 - 校验：在 `prototype/` 下运行 `node tools/dev-check.mjs`
 
@@ -88,4 +88,7 @@ prototype/
 ## 已知说明
 
 - 教学日历页面为多层历史增强叠加，最终路由由 `js/modules/19-teaching-calendar.js` 接管；如需修改请以该文件为准，避免与历史装饰逻辑冲突。
+- 经济学原理的 16 周日历种子数据同样在 `19-teaching-calendar.js`（与离散数学种子完全隔离，按课程 id 分 key 存储）；`04-calendar-fidelity.js` 的 `targets` 维护各课程的学时基准（经济学 48 = 讲授 40 + 课程项目 8），新增课程时需同步补充，否则学时会被按离散基准重排。
+- 备课工作台（`27-preparation-workspace.js`）的 MD 教案草稿与学术资料同样按课程 id 分 key 存储（离散数学沿用 `ai-jiaowu-prep-workspace-v4*`，经济学为 `*-economics`）；两门课程各自维护默认教案、默认资料、备课单元切换条与 AI 助手文案，新增课程时需在该模块同步补充默认数据，且文案需避开 `33-economics-course-data.js` 替换层的源词（如“关系”“映射”），避免被二次替换。
+- 支持 `index.html?course=economics#course/...` 深链直接打开指定课程工作区（不带参数时行为不变）。
 - `node tools/dev-check.mjs` 中重复 `window.*` 覆盖仅作 WARN，用于提示后续逐步收敛，不影响运行。

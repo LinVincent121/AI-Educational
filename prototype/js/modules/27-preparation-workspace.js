@@ -172,6 +172,12 @@
   const STORAGE_KEY = 'ai-jiaowu-prep-workspace-v4';
   const CUSTOM_SOURCES_KEY = 'ai-jiaowu-prep-custom-sources-v1';
 
+  // 课程隔离：教案草稿与学术资料按课程分 key 存储，默认数据互不影响。
+  // 离散数学沿用原 key（保留教师已保存内容），其他课程追加课程 id 后缀。
+  const prepCourseId = () => { try { return localStorage.getItem('ai-jiaowu-current-course') || 'discrete'; } catch { return 'discrete'; } };
+  const prepIsEconomics = () => prepCourseId() === 'economics';
+  const prepStorageKey = () => prepCourseId() === 'discrete' ? STORAGE_KEY : STORAGE_KEY + '-' + prepCourseId();
+
   const defaultCustomSources = [
     { id: 'src-cnki', name: '中国知网 (CNKI)', isPreset: true, enabled: true },
     { id: 'src-wanfang', name: '维普/万方论文网', isPreset: true, enabled: true },
@@ -283,6 +289,118 @@
 2. 书面作业：教材 P48 习题 3、7、12（哈斯图绘制）。
 `;
 
+  // 经济学原理专属默认教案（对应大纲第一章第二节，与离散数学教案完全隔离）
+  const economicsMdLessonPlan = `# 第一章 经济学基础与供求分析 · 第二节 需求、供给与市场均衡
+
+> 教学对象：经管25-1、25-2班 ｜ 授课时间：第 2 周（3 学时） ｜ 授课教师：林老师
+
+## 1. 教学目标
+1. 掌握需求曲线与供给曲线的含义，理解需求定律与供给定律背后的行为逻辑。
+2. 理解市场均衡价格与均衡数量的形成过程，掌握比较静态分析方法。
+3. 能够区分“需求量变动”与“需求变动”，并分析价格以外的因素如何移动曲线。
+4. 会运用供求模型解释现实市场现象与简单政策效果。
+
+## 2. 教学重点与难点
+
+**教学重点**
+
+- 需求曲线、供给曲线的推导与位移因素；
+- 均衡价格的形成与“看不见的手”的协调机制；
+- 比较静态分析：供求移动对均衡的影响；
+- 价格管制（限价与支持价）的后果分析。
+
+**教学难点**
+
+- 区分“需求量变动”（沿曲线移动）与“需求变动”（曲线整体位移）；
+- 供给与需求同时移动时均衡方向的不确定性判断；
+- 理解短缺与过剩是价格受到管制时的非均衡表现。
+
+## 3. 教学引入
+
+以 2026 年夏季蔬菜价格波动为案例，请学生先猜测“高温减产—批发价上升—零售价跟涨”的传导链条，再引出供求模型如何把这一过程形式化。
+
+## 4. 教学内容与推导
+
+### 4.1 需求与供给曲线
+
+设市场需求函数为 Qd(P)，供给函数为 Qs(P)：
+
+- 需求定律：价格上升，需求量减少，需求曲线向右下方倾斜；
+- 供给定律：价格上升，供给量增加，供给曲线向右上方倾斜；
+- 均衡条件：Qd(P*) = Qs(P*)，此时市场出清。
+
+#### 课堂提问
+
+> 若某城市房租限价低于均衡租金，会出现短缺还是过剩？租房市场会出现哪些非价格调整方式？
+
+## 5. 课堂总结与作业
+1. 思考题：判断“汽油涨价导致汽车需求下降”中影响的是需求量还是需求，说明曲线如何移动。
+2. 书面作业：教材第一章习题 3、7、12（供求曲线移动与均衡计算）。
+`;
+
+  // 经济学原理专属默认学术资料（与离散数学资料完全隔离）
+  const economicsAcademicMaterials = [
+    {
+      id: 'emat-1',
+      title: '农产品价格支持政策下的供求弹性测算——基于粮食市场的实证分析',
+      type: 'paper',
+      category: 'case', // 课堂案例
+      categoryLabel: '课堂案例',
+      source: '中国知网 (CNKI)',
+      url: 'https://kns.cnki.net/kcms/detail/article_20481.html',
+      crawledAt: '2026-09-08 10:15',
+      abstract: '本文利用省级面板数据测算了粮食市场的需求价格弹性与供给弹性，评估最低收购价政策对均衡价格和农户收入的影响。',
+      note: '可在 1.2 节讲解均衡变动时，作为价格支持政策案例引入',
+      tags: ['供求弹性', '教学应用'],
+      isSaved: true
+    },
+    {
+      id: 'emat-2',
+      title: '经济思想史话：亚当·斯密与“看不见的手”的市场协调机制',
+      type: 'text',
+      category: 'background', // 背景知识
+      categoryLabel: '背景知识',
+      source: '国家智慧教育平台',
+      url: 'https://smartedu.cn/course/econ-history-02',
+      crawledAt: '2026-09-07 16:40',
+      abstract: '1776 年《国富论》中关于分工与市场价格自发协调的论述，奠定了现代供求分析与市场机制思想的基础。',
+      note: '适合放在本节课导言部分，激发学生学习兴趣',
+      tags: ['经济思想史', '市场机制'],
+      isSaved: true
+    },
+    {
+      id: 'emat-3',
+      title: '专利 CN115204736B：一种基于电商大数据的消费品价格监测与均衡预测方法',
+      type: 'link',
+      category: 'news', // 最新资讯/专利
+      categoryLabel: '最新资讯',
+      source: '中国专利网 (Patent)',
+      url: 'https://patents.google.com/patent/CN115204736B',
+      crawledAt: '2026-09-08 11:05',
+      abstract: '公开了一种利用电商价格大数据实时估计供求缺口并预测均衡价格走势的方法，预警准确率提升 35%。',
+      note: '用于弹性与市场均衡章节的前沿拓展案例',
+      tags: ['大数据', '价格监测'],
+      isSaved: true
+    },
+    {
+      id: 'emat-4',
+      title: 'arXiv:2608.10442 - Behavioral Foundations of Demand Curves: Evidence from Field Experiments',
+      type: 'paper',
+      category: 'reading', // 拓展阅读
+      categoryLabel: '拓展阅读',
+      source: 'arXiv 学术预印本',
+      url: 'https://arxiv.org/abs/2608.10442',
+      crawledAt: '2026-09-06 14:20',
+      abstract: '通过系列田野实验检验了需求定律的行为基础，讨论参照点效应与需求曲线位移的微观证据。',
+      note: '课后优秀学生拓展阅读论文',
+      tags: ['行为经济学', '拓展阅读'],
+      isSaved: true
+    }
+  ];
+
+  const currentMdPlanDefault = () => prepIsEconomics() ? economicsMdLessonPlan : defaultMdLessonPlan;
+  const currentAcademicMaterialsDefault = () => prepIsEconomics() ? economicsAcademicMaterials : defaultAcademicMaterials;
+
   // 获取和存取状态
   function getCustomSources() {
     try {
@@ -297,23 +415,23 @@
 
   function getAcademicMaterials() {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY + '_materials');
-      return stored ? JSON.parse(stored) : defaultAcademicMaterials;
-    } catch { return defaultAcademicMaterials; }
+      const stored = localStorage.getItem(prepStorageKey() + '_materials');
+      return stored ? JSON.parse(stored) : currentAcademicMaterialsDefault();
+    } catch { return currentAcademicMaterialsDefault(); }
   }
 
   function saveAcademicMaterials(mats) {
-    try { localStorage.setItem(STORAGE_KEY + '_materials', JSON.stringify(mats)); } catch {}
+    try { localStorage.setItem(prepStorageKey() + '_materials', JSON.stringify(mats)); } catch {}
   }
 
   function getMdPlan() {
     try {
-      return localStorage.getItem(STORAGE_KEY + '_md') || defaultMdLessonPlan;
-    } catch { return defaultMdLessonPlan; }
+      return localStorage.getItem(prepStorageKey() + '_md') || currentMdPlanDefault();
+    } catch { return currentMdPlanDefault(); }
   }
 
   function saveMdPlan(content) {
-    try { localStorage.setItem(STORAGE_KEY + '_md', content); } catch {}
+    try { localStorage.setItem(prepStorageKey() + '_md', content); } catch {}
   }
 
   // 行内 Markdown -> HTML（加粗 / 斜体 / 行内代码 / 链接）
@@ -462,11 +580,32 @@
     return html.join('\n');
   }
 
+  // 备课单元切换条数据：离散数学与经济学原理各自维护，互不影响
+  const prepUnitStrip = () => prepIsEconomics() ? [
+    { id: 'ech1-2', title: '第一章 · 第二节 需求、供给与市场均衡', week: '第 2 周 · 3 学时', status: '8/10 已确认', style: '', active: true },
+    { id: 'ech1-1', title: '第一章 · 第一节 稀缺性、选择与机会成本', week: '第 1 周 · 3 学时', status: '待确认', style: ' style="color:#b66f20"', active: false },
+    { id: 'ech2-1', title: '第二章 · 第一节 消费者选择', week: '第 5 周 · 3 学时', status: '生成中', style: ' style="color:#4774b5"', active: false },
+    { id: 'ech3-1', title: '第三章 · 第一节 完全竞争市场', week: '第 9 周 · 3 学时', status: '已确认', style: '', active: false }
+  ] : [
+    { id: 'ch1-2', title: '第一章 · 第二节 关系', week: '第 3 周 · 6 学时', status: '8/10 已确认', style: '', active: true },
+    { id: 'ch1-1', title: '第一章 · 第一节 集合', week: '第 2 周 · 4 学时', status: '待确认', style: ' style="color:#b66f20"', active: false },
+    { id: 'ch2-1', title: '第二章 · 第一节 命题逻辑', week: '第 6 周 · 2 学时', status: '生成中', style: ' style="color:#4774b5"', active: false },
+    { id: 'ch3-1', title: '第三章 · 第一节 图的基本概念', week: '第 10 周 · 3 学时', status: '已确认', style: '', active: false }
+  ];
+
   // 页面全局 HTML 构建
   window.__prepWorkspacePage = function() {
     const customSources = getCustomSources();
     const materials = getAcademicMaterials();
     const mdContent = getMdPlan();
+    const econ = prepIsEconomics();
+    const unitPills = prepUnitStrip().map(u =>
+      `<div class="prep-v3-unit-pill${u.active ? ' active' : ''}" onclick="switchPrepUnit('${u.id}')">
+              <b>${u.title}</b>
+              <small>${u.week}</small>
+              <i${u.style}>${u.status}</i>
+            </div>`
+    ).join('\n            ');
 
     return `
       <div class="preparation-page prep-v3-page" data-page="preparation">
@@ -481,26 +620,7 @@
         <div class="prep-v3-header-card">
           <div style="font-size:11px;color:#7a9491;margin-bottom:8px;font-weight:600;">SELECT LESSON UNIT · 备课单元选择器</div>
           <div class="prep-v3-unit-strip">
-            <div class="prep-v3-unit-pill active" onclick="switchPrepUnit('ch1-2')">
-              <b>第一章 · 第二节 关系</b>
-              <small>第 3 周 · 6 学时</small>
-              <i>8/10 已确认</i>
-            </div>
-            <div class="prep-v3-unit-pill" onclick="switchPrepUnit('ch1-1')">
-              <b>第一章 · 第一节 集合</b>
-              <small>第 2 周 · 4 学时</small>
-              <i style="color:#b66f20">待确认</i>
-            </div>
-            <div class="prep-v3-unit-pill" onclick="switchPrepUnit('ch2-1')">
-              <b>第二章 · 第一节 命题逻辑</b>
-              <small>第 6 周 · 2 学时</small>
-              <i style="color:#4774b5">生成中</i>
-            </div>
-            <div class="prep-v3-unit-pill" onclick="switchPrepUnit('ch3-1')">
-              <b>第三章 · 第一节 图的基本概念</b>
-              <small>第 10 周 · 3 学时</small>
-              <i>已确认</i>
-            </div>
+            ${unitPills}
           </div>
         </div>
 
@@ -515,7 +635,7 @@
               </div>
               <div class="prep-academic-tools">
                 <div class="prep-scraper-input-wrap">
-                  <input id="scraperKeyword" placeholder="搜索论文、专利、教学案例…" value="二元关系 算法案例" oninput="filterAcademicMaterials(this.value)" />
+                  <input id="scraperKeyword" placeholder="搜索论文、专利、教学案例…" value="${econ ? '供求弹性 政策案例' : '二元关系 算法案例'}" oninput="filterAcademicMaterials(this.value)" />
                   <button class="btn primary" style="font-size:11px;padding:6px 10px;" onclick="runAiWebScraper()">🔍 搜索</button>
                 </div>
                 <div class="prep-source-group" aria-label="数据源类型">
@@ -563,8 +683,8 @@
               <div id="prepPaneAi" class="prep-v3-tab-pane active">
                 <div class="prep-ai-chips">
                   <button onclick="prepAiAsk('检查当前教案是否覆盖教学目的与重难点')">检查教案</button>
-                  <button onclick="prepAiAsk('补充一道 Hasse 图相关例题')">补充例题</button>
-                  <button onclick="prepAiAsk('重写「4.1 关系的五种基本性质」小节，使讲解更通俗')">重写小节</button>
+                  <button onclick="prepAiAsk('${econ ? '补充一道供求曲线移动例题' : '补充一道 Hasse 图相关例题'}')">补充例题</button>
+                  <button onclick="prepAiAsk('${econ ? '重写「4.1 需求与供给曲线」小节，使讲解更通俗' : '重写「4.1 关系的五种基本性质」小节，使讲解更通俗'}')">重写小节</button>
                 </div>
                 <div id="prepAiLog" class="chat-log" aria-live="polite">
                   <div class="chat-msg assistant">你好，我可以围绕当前备课单元的 MD 教案回答需求，例如“检查教案覆盖”“补充例题”，也可以选中正文后用“AI 润色 / 改写”。</div>
@@ -602,7 +722,7 @@
         </div>
         <div class="prep-material-title" onclick="previewAcademicMaterial('${m.id}')">${escapeHtml(m.title)}</div>
         <p class="prep-material-abstract">${escapeHtml(m.abstract)}</p>
-        <div class="prep-material-tags"><span>${escapeHtml(materialTypeLabel(m))}</span>${(m.tags || ['关系','教学应用']).map(t => `<span>#${escapeHtml(t)}</span>`).join('')}</div>
+        <div class="prep-material-tags"><span>${escapeHtml(materialTypeLabel(m))}</span>${(m.tags || (prepIsEconomics() ? ['供求', '教学应用'] : ['关系', '教学应用'])).map(t => `<span>#${escapeHtml(t)}</span>`).join('')}</div>
         ${(m.type === 'video' || m.type === 'audio') ? `<div class="prep-media-placeholder" onclick="previewAcademicMaterial('${m.id}')">▶ 视频内容预览 · 点击观看</div>` : ''}
 
         ${m.note ? `<div class="prep-mat-note-box"><span>📝 <b>备注：</b>${escapeHtml(m.note)}</span><button style="border:0;background:transparent;cursor:pointer;color:#873800;" onclick="editMaterialNote('${m.id}')">✏️</button></div>` : ''}
@@ -982,12 +1102,13 @@
     } catch (_) {}
 
     const selectedText = decodePrepEntities(text).trim();
+    const econAction = prepIsEconomics();
     const actionMap = {
       polish: { title: 'AI 润色修饰', result: selectedText + '（针对语言流畅度与教学严谨度进行了提炼表达）' },
       rewrite: { title: 'AI 改写为递演逻辑', result: '引入实际案例对比：' + selectedText + '，引导学生通过反例深入推导。' },
-      expand: { title: 'AI 扩写教学步骤', result: selectedText + '。在讲解该步骤时，教师可在板书列出映射矩阵，并引导学生开展 3 分钟小组讨论。' },
+      expand: { title: 'AI 扩写教学步骤', result: selectedText + (econAction ? '。在讲解该步骤时，教师可在板书绘制供求曲线示意图，并引导学生开展 3 分钟小组讨论。' : '。在讲解该步骤时，教师可在板书列出映射矩阵，并引导学生开展 3 分钟小组讨论。') },
       simplify: { title: 'AI 精简提炼', result: selectedText.substring(0, Math.max(10, Math.floor(selectedText.length * 0.6))) + '…' },
-      academic: { title: 'AI 学术规范化表达', result: '规范学术表述：根据形式逻辑定义，' + selectedText }
+      academic: { title: 'AI 学术规范化表达', result: '规范学术表述：根据' + (econAction ? '经济学原理' : '形式逻辑定义') + '，' + selectedText }
     };
 
     const target = actionMap[actionType] || actionMap.polish;
@@ -1334,8 +1455,8 @@
     const badge = document.getElementById('prepMatCount');
     if (!badge) return;
     try {
-      const stored = localStorage.getItem(STORAGE_KEY + '_materials');
-      const arr = stored ? JSON.parse(stored) : defaultAcademicMaterials;
+      const stored = localStorage.getItem(prepStorageKey() + '_materials');
+      const arr = stored ? JSON.parse(stored) : currentAcademicMaterialsDefault();
       badge.textContent = (arr && arr.length) ? arr.length : 0;
     } catch (_) {}
   }
@@ -1343,11 +1464,19 @@
   /* ===================== 备课 AI 助手（Mock 对话） ===================== */
   function prepAiCannedReply(text) {
     const t = text || '';
-    if (/检查|覆盖/.test(t)) return '已检查当前教案：教学目标的 4 项与大纲目标全部对应；教学重点与难点均已给出讲解方向；「4.1 关系的五种基本性质」建议补充一道反例互动题后再保存。';
-    if (/例题|题目/.test(t)) return '建议补充：设 A={1,2,3,4}，R={(1,1),(2,2),(3,3),(4,4),(1,2),(2,1),(3,4)}。请学生判断 R 的各条性质并用关系矩阵验证。可插入「4.1」小节后。';
-    if (/重写|改写/.test(t)) return '重写建议：先列出三种基本性质的定义，再用同一组矩阵逐条验证，最后对比“反对称”与“不对称”的反例。可选中正文后使用“AI 改写”，查看差异并应用。';
-    if (/引入|导入|排课/.test(t)) return '可在「3. 教学引入」补充：以教务系统排课冲突为例，把“同一教室被两门课占用”抽象为关系与矩阵判定，衔接排课算法应用。';
-    if (/作业|思考|总结/.test(t)) return '作业建议：补充判断空关系、全关系分别满足哪些性质，说明等价关系为何必须自反，并对比哈斯图与关系图。';
+    if (prepIsEconomics()) {
+      if (/检查|覆盖/.test(t)) return '已检查当前教案：教学目标的 4 项与经济学大纲目标全部对应；教学重点与难点均已给出讲解方向；「4.1 需求与供给曲线」建议补充一道政策案例互动题后再保存。';
+      if (/例题|题目/.test(t)) return '建议补充：设某地住房市场需求函数 Qd=100-2P，供给函数 Qs=20+3P，请学生求解均衡价格与数量，并讨论限价 P=12 时的市场状况。可插入「4.1」小节后。';
+      if (/重写|改写/.test(t)) return '重写建议：先用生活实例引出需求定律与供给定律，再用同一组供求曲线逐条演示位移因素，最后对比“需求量变动”与“需求变动”。可选中正文后使用“AI 改写”，查看差异并应用。';
+      if (/引入|导入/.test(t)) return '可在「3. 教学引入」补充：以新能源车补贴退坡后的市场价格变化为例，把政策调整抽象为供求曲线位移，衔接政策效果评估。';
+      if (/作业|思考|总结/.test(t)) return '作业建议：补充判断收入上升对正常品与低档品需求的差异化影响，说明支持价格政策为何会带来过剩，并绘制供求曲线示意图。';
+    } else {
+      if (/检查|覆盖/.test(t)) return '已检查当前教案：教学目标的 4 项与大纲目标全部对应；教学重点与难点均已给出讲解方向；「4.1 关系的五种基本性质」建议补充一道反例互动题后再保存。';
+      if (/例题|题目/.test(t)) return '建议补充：设 A={1,2,3,4}，R={(1,1),(2,2),(3,3),(4,4),(1,2),(2,1),(3,4)}。请学生判断 R 的各条性质并用关系矩阵验证。可插入「4.1」小节后。';
+      if (/重写|改写/.test(t)) return '重写建议：先列出三种基本性质的定义，再用同一组矩阵逐条验证，最后对比“反对称”与“不对称”的反例。可选中正文后使用“AI 改写”，查看差异并应用。';
+      if (/引入|导入|排课/.test(t)) return '可在「3. 教学引入」补充：以教务系统排课冲突为例，把“同一教室被两门课占用”抽象为关系与矩阵判定，衔接排课算法应用。';
+      if (/作业|思考|总结/.test(t)) return '作业建议：补充判断空关系、全关系分别满足哪些性质，说明等价关系为何必须自反，并对比哈斯图与关系图。';
+    }
     return '已收到：' + (t.length > 40 ? t.slice(0, 40) + '…' : t) + '。我将围绕当前备课单元生成建议草稿；也可选中 MD 正文直接使用“AI 润色 / 改写”。';
   }
 

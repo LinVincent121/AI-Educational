@@ -68,7 +68,15 @@
         </div>
 
 
-        <script src="js/core/00-app-shell.js?v=20260908-23">
+        <script>
+            /* Deep link helper: ?course=economics opens the prototype directly
+             * in that course workspace. Without the parameter nothing changes. */
+            try {
+                var __courseParam = new URLSearchParams(location.search).get('course');
+                if (__courseParam) localStorage.setItem('ai-jiaowu-current-course', __courseParam);
+            } catch (e) {}
+        </script>
+        <script src="js/core/00-app-shell.js?v=20260910-02">
         </script>
         <script src="js/core/04-materials-alignment.js?v=20260908-23">
         </script>
@@ -78,7 +86,7 @@
         </script>
         <script src="js/core/03-course-processing.js?v=20260908-23">
         </script>
-        <script src="js/core/course-v2-loader.js?v=20260909-48">
+        <script src="js/core/course-v2-loader.js?v=20260910-04">
         </script>
     </body>
 

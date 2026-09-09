@@ -33,10 +33,26 @@ const current=()=>{let id='discrete';try{id=localStorage.getItem('ai-jiaowu-curr
  const escapeHtml=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
  const renderCourseOption=o=>{const view=courseView(o);return `<button class="course-option" role="menuitem" onclick="switchCourse('${o.id}')"><span><b>${escapeHtml(view.name)}</b><small>${escapeHtml(view.code)} · ${escapeHtml(view.term)}</small></span><span class="tag ${o.archived?'gray':'ok'}">${o.archived?'已归档':'可使用'}</span></button>`};
 window.toggleCourseSwitcher=function(e){if(e)e.stopPropagation();const wrap=document.getElementById('courseSwitch');if(!wrap)return;const open=!wrap.classList.contains('open');wrap.classList.toggle('open',open);const btn=wrap.querySelector('.course-switch-btn');if(btn)btn.setAttribute('aria-expanded',String(open))};
- window.switchCourse=function(id){try{localStorage.setItem('ai-jiaowu-current-course',id)}catch{}const wrap=document.getElementById('courseSwitch');if(wrap){wrap.classList.remove('open');const btn=wrap.querySelector('.course-switch-btn');if(btn)btn.setAttribute('aria-expanded','false')}render();markTop()};
+ window.switchCourse=function(id){
+   const previous=(()=>{try{return localStorage.getItem('ai-jiaowu-current-course')||'discrete'}catch{return 'discrete'}})();
+   try{localStorage.setItem('ai-jiaowu-current-course',id)}catch{}
+   const wrap=document.getElementById('courseSwitch');
+   if(wrap){wrap.classList.remove('open');const btn=wrap.querySelector('.course-switch-btn');if(btn)btn.setAttribute('aria-expanded','false')}
+   if(previous===id){render();markTop();return}
+   // Several prototype modules keep course-specific mock data in module scope.
+   // Re-initialize the app after switching so no discrete-math snapshot can
+   // remain on screen under the economics course heading.
+   // Course switching always starts from the selected course overview.
+   if(typeof location!=='undefined'){
+     if(location.hash!=='#course/overview') location.hash='#course/overview';
+     if(typeof location.reload==='function') location.reload();
+   }
+   else {render();markTop()}
+ };
 document.addEventListener('click',e=>{const wrap=document.getElementById('courseSwitch');if(wrap&&!wrap.contains(e.target)){wrap.classList.remove('open');const btn=wrap.querySelector('.course-switch-btn');if(btn)btn.setAttribute('aria-expanded','false')}});
  const shellV2=(content,active)=>{const c=current();const switcher='<div class="side-course-switch" aria-label="课程切换"><div class="side-current-course"><span>当前课程</span><strong>'+escapeHtml(c.name)+'</strong></div><div class="course-switch" id="courseSwitch"><button class="course-switch-btn" aria-haspopup="menu" aria-expanded="false" onclick="toggleCourseSwitcher(event)"><span>切换课程</span><span class="chevron" aria-hidden="true"></span></button><div class="course-switch-menu" role="menu">'+options.map(renderCourseOption).join('')+'</div></div></div>';return '<div class="layout"><aside class="side">'+switcher+nav.map(([t,k])=>'<a href="#course/'+k+'" class="'+(active===k?'active':'')+'">◈　'+t+'</a>').join('')+'<div class="foot"><span class="dot"></span>Mock 数据模式<br><small>'+escapeHtml(c.role)+'视图</small></div></aside><main class="main">'+content+'</main></div>'};
-const chaptersKey='ai-jiaowu-syllabus-demo';
+const activeCourseId=(()=>{try{return localStorage.getItem('ai-jiaowu-current-course')||'discrete'}catch{return 'discrete'}})();
+const chaptersKey=activeCourseId==='discrete'?'ai-jiaowu-syllabus-demo':'ai-jiaowu-syllabus-demo-'+activeCourseId;
 const defaultChapters=[
  {id:'ch1',title:'第一章 集合论基础',hours:8,knowledge:'集合、关系与映射',children:[
   {id:'ch1-1',title:'1.1 集合的基本概念',hours:2,knowledge:'集合的表示、运算与幂集'},
@@ -74,7 +90,31 @@ const defaultChapters=[
  {id:'practice-salesman',title:'流动推销问题的练习',hours:1,knowledge:'组合优化问题实践',children:[]},
  {id:'qa',title:'答疑辅导',hours:0,knowledge:'课程答疑与综合复习',children:[]}
 ];
-let chapters;try{const stored=JSON.parse(localStorage.getItem(chaptersKey)||'null');const required=['ch1','ch2','ch3','ch4','practice-dijkstra','practice-kruskal','practice-prim','practice-salesman','qa'];const valid=Array.isArray(stored)&&required.every(id=>stored.some(ch=>ch.id===id));chapters=valid?stored:defaultChapters;if(!valid)localStorage.setItem(chaptersKey,JSON.stringify(chapters))}catch{chapters=defaultChapters}
+const economicsChapters=[
+ {id:'econ-ch1',title:'第一章 经济学基础与供求分析',hours:12,knowledge:'稀缺性、机会成本、供求与弹性',children:[
+  {id:'econ-ch1-1',title:'1.1 稀缺性、选择与机会成本',hours:4,knowledge:'资源配置、边际分析与机会成本'},
+  {id:'econ-ch1-2',title:'1.2 需求、供给与市场均衡',hours:4,knowledge:'供求曲线、均衡价格与均衡数量'},
+  {id:'econ-ch1-3',title:'1.3 弹性与市场反应',hours:4,knowledge:'价格弹性、收入弹性与交叉弹性'}
+ ]},
+ {id:'econ-ch2',title:'第二章 消费者、生产者与成本',hours:12,knowledge:'消费者选择、生产函数与企业决策',children:[
+  {id:'econ-ch2-1',title:'2.1 消费者选择',hours:4,knowledge:'预算约束、效用与替代效应'},
+  {id:'econ-ch2-2',title:'2.2 生产与成本',hours:4,knowledge:'生产函数、边际成本与规模经济'},
+  {id:'econ-ch2-3',title:'2.3 企业决策与利润',hours:4,knowledge:'收益、利润最大化与盈亏平衡'}
+ ]},
+ {id:'econ-ch3',title:'第三章 市场结构与政府政策',hours:12,knowledge:'竞争、垄断、外部性与公共政策',children:[
+  {id:'econ-ch3-1',title:'3.1 完全竞争市场',hours:4,knowledge:'短期供给、进入退出与长期均衡'},
+  {id:'econ-ch3-2',title:'3.2 垄断与价格歧视',hours:4,knowledge:'市场势力、垄断定价与监管'},
+  {id:'econ-ch3-3',title:'3.3 外部性、公共物品与政策',hours:4,knowledge:'税收、补贴、配额与公共治理'}
+ ]},
+ {id:'econ-ch4',title:'第四章 宏观经济与开放经济',hours:12,knowledge:'国民收入、经济周期与国际贸易',children:[
+  {id:'econ-ch4-1',title:'4.1 国民收入与经济增长',hours:4,knowledge:'GDP 核算、生产率与收入分配'},
+  {id:'econ-ch4-2',title:'4.2 货币、通货膨胀与失业',hours:4,knowledge:'物价水平、失业类型与经济周期'},
+  {id:'econ-ch4-3',title:'4.3 宏观政策与国际贸易',hours:4,knowledge:'财政政策、货币政策与比较优势'}
+ ]}
+];
+const chapterDefaults=activeCourseId==='economics'?economicsChapters:defaultChapters;
+const requiredChapterIds=chapterDefaults.map(ch=>ch.id);
+let chapters;try{const stored=JSON.parse(localStorage.getItem(chaptersKey)||'null');const valid=Array.isArray(stored)&&requiredChapterIds.every(id=>stored.some(ch=>ch.id===id));chapters=valid?stored:chapterDefaults;if(!valid)localStorage.setItem(chaptersKey,JSON.stringify(chapters))}catch{chapters=chapterDefaults}
 window.__syllabusChapters=chapters;
 let syllabusDragIndex=null;
 window.renderSyllabusTree=function(){const host=document.getElementById('syllabusTree');if(!host)return;host.innerHTML=chapters.map((ch,i)=>'<div class="chapter-node" data-chapter-index="'+i+'"><div class="chapter-row" draggable="true" data-chapter-index="'+i+'"><span class="chapter-index">'+String(i+1).padStart(2,'0')+'</span><div class="chapter-main"><b>'+escapeHtml(ch.title)+' '+(ch.ai?'<em class="tag ok">AI 草稿</em>':'')+'</b><small>'+escapeHtml(ch.knowledge)+' · '+ch.hours+' 学时</small></div><div class="chapter-controls"><button class="icon-btn" title="上移" onclick="moveSyllabusChapter('+i+',-1)" '+(i===0?'disabled':'')+'>↑</button><button class="icon-btn" title="下移" onclick="moveSyllabusChapter('+i+',1)" '+(i===chapters.length-1?'disabled':'')+'>↓</button></div></div><div class="chapter-children">'+(ch.children||[]).map((sub,j)=>'<div class="chapter-row child" data-chapter-index="'+i+'" data-child-index="'+j+'"><span class="chapter-index">'+(i+1)+'.'+(j+1)+'</span><div class="chapter-main"><b>'+escapeHtml(sub.title)+'</b><small>'+escapeHtml(sub.knowledge)+' · '+sub.hours+' 学时</small></div><span class="tag gray">子章节</span></div>').join('')+'</div></div>').join('');host.querySelectorAll('.chapter-row:not(.child)').forEach(row=>{row.addEventListener('dragstart',e=>{syllabusDragIndex=Number(row.dataset.chapterIndex);row.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(syllabusDragIndex))});row.addEventListener('dragover',e=>{e.preventDefault();row.classList.add('drag-over');e.dataTransfer.dropEffect='move'});row.addEventListener('dragleave',()=>row.classList.remove('drag-over'));row.addEventListener('drop',e=>{e.preventDefault();row.classList.remove('drag-over');const target=Number(row.dataset.chapterIndex);if(Number.isInteger(syllabusDragIndex)&&syllabusDragIndex!==target){const [item]=chapters.splice(syllabusDragIndex,1);chapters.splice(target,0,item);localStorage.setItem(chaptersKey,JSON.stringify(chapters));renderSyllabusTree()}});row.addEventListener('dragend',()=>{row.classList.remove('dragging');syllabusDragIndex=null})})};

@@ -54,8 +54,9 @@
   const decorate=()=>{
     if(location.hash!=='#courses')return;
     const cards=[...document.querySelectorAll('#courseCards .course-tile')];
-    cards.filter(card=>(card.dataset.courseId||nameToId[(card.querySelector('h2')||{}).textContent.trim()])!=='discrete').forEach(card=>card.remove());
-    const discrete=document.querySelector('#courseCards .course-tile');
+    cards.forEach(card=>{const title=(card.querySelector('h2')||{}).textContent?.trim()||'';const id=card.dataset.courseId||nameToId[title];if(id)card.dataset.courseId=id});
+    cards.filter(card=>{const id=card.dataset.courseId||nameToId[(card.querySelector('h2')||{}).textContent.trim()];return id!=='discrete'&&id!=='economics'}).forEach(card=>card.remove());
+    const discrete=document.querySelector('#courseCards .course-tile[data-course-id="discrete"]')||document.querySelector('#courseCards .course-tile');
     if(discrete&&!document.querySelector('#courseCards .course-tile[data-course-id="economics"]')){
       const economics=discrete.cloneNode(true); economics.dataset.courseId='economics'; economics.dataset.name='经济学原理'; economics.dataset.courseEditorBound='';
       const title=economics.querySelector('h2'); if(title)title.textContent='经济学原理';

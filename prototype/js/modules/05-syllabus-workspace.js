@@ -163,12 +163,127 @@
 - **审定负责人**：徐长波`
   };
 
+  // Economics has its own syllabus source. It is deliberately kept separate
+  // from the discrete-mathematics defaults so switching courses can never
+  // mutate or visually rewrite the discrete course data.
+  const economicsMdFields = {
+    basic: `# 01 课程基本信息
+
+## 课程概要
+- **课程名称**：经济学原理 (Principles of Economics)
+- **课程编号**：ECON101
+- **课程类别**：学科基础必修课
+- **适用专业**：经济学与管理类专业
+- **学分 / 学时**：3 学分 / 48 学时 (理论讲授 40 学时 / 课程项目 8 学时)
+
+## 课程简介
+本课程介绍微观经济学与宏观经济学的基本概念、分析方法和政策工具。课程围绕稀缺性与机会成本、供求与市场均衡、消费者与生产者选择、市场结构、宏观经济运行及国际贸易展开，结合真实数据和经济案例，培养学生理解经济现象、分析公共政策和进行理性决策的能力。`,
+
+    purpose: `# 02 课程目标与培养要求
+
+## 课程目的
+本课程围绕稀缺资源配置、市场运行与宏观经济治理展开，帮助学生建立经济学分析框架，理解价格信号、激励机制和政策工具，并能够用数据与模型解释现实经济现象。
+
+## 课程目标清单
+- **课程目标 1**：掌握需求、供给、弹性、消费者选择、生产成本和市场均衡等微观经济学基本概念。
+- **课程目标 2**：能够运用均衡分析、成本收益分析和市场结构模型，分析价格变化、公共政策与企业决策问题。
+- **课程目标 3**：能够结合统计数据和真实案例完成经济现象调研，形成有证据、有逻辑的分析报告，培养理性决策与公共责任意识。`,
+
+    support: `# 03 课程目标与毕业要求支撑矩阵
+
+| 课程目标 | 权重 | 支撑的毕业要求指标点 | 对应教学内容 | 教学方法与手段 |
+|---|---|---|---|---|
+| 课程目标 1 | 0.4 | 1.2 经济学基础知识与数据素养 | 第一章：稀缺性、供求、弹性；第二章：消费者与生产者选择 | 案例讲授、图形分析、随堂练习 |
+| 课程目标 2 | 0.3 | 2.2 复杂问题分析与决策能力 | 第二章：成本收益；第三章：政策工具与市场失灵 | 情境推演、数据讨论、政策模拟 |
+| 课程目标 3 | 0.3 | 4.1 自主学习、沟通表达与社会责任 | 第四章：市场结构与宏观经济；课程调研项目 | 小组调研、报告写作、课堂汇报 |`,
+
+    content: `# 04 课程教学内容与基本要求
+
+> 课程内容以经济现象、基础模型和数据案例为主线，章节树中的教学内容与本区块保持一致。
+
+## 第一章 经济学基础与供求分析 (12 学时)
+- **1.1 稀缺性、选择与机会成本**：经济学研究对象、资源配置、边际分析和机会成本。
+- **1.2 需求、供给与市场均衡**：需求曲线、供给曲线、均衡价格及市场变化的比较静态分析。
+- **1.3 弹性与市场反应**：价格弹性、收入弹性、交叉弹性及其在定价和税收分析中的应用。
+
+## 第二章 消费者、生产者与成本 (12 学时)
+- **2.1 消费者选择**：预算约束、效用、替代效应与收入效应。
+- **2.2 生产与成本**：生产函数、短期与长期成本、规模经济和边际成本。
+- **2.3 企业决策与利润**：收益、成本、利润最大化和盈亏平衡分析。
+
+## 第三章 市场结构与政府政策 (12 学时)
+- **3.1 完全竞争市场**：企业进入退出、短期供给和长期均衡。
+- **3.2 垄断与价格歧视**：市场势力、垄断定价、价格歧视和监管思路。
+- **3.3 外部性、公共物品与政策**：税收、补贴、配额、科斯定理和公共治理。
+
+## 第四章 宏观经济与开放经济 (12 学时)
+- **4.1 国民收入与经济增长**：GDP 核算、生产率、经济增长和收入分配。
+- **4.2 货币、通货膨胀与失业**：货币职能、物价水平、失业类型与经济周期。
+- **4.3 财政政策、货币政策与国际贸易**：总需求调节、汇率、比较优势和贸易政策。`,
+
+    hours: `# 05 学时分配表
+
+| 章次 | 教学内容名称 | 理论讲授学时 | 实验 / 上机 | 大作业 | 合计学时 |
+|---|---|---|---|---|---|
+| 第一章 | 经济学基础与供求分析 | 10 | 0 | 2 | 12 |
+| 第二章 | 消费者、生产者与成本 | 10 | 0 | 2 | 12 |
+| 第三章 | 市场结构与政府政策 | 10 | 0 | 2 | 12 |
+| 第四章 | 宏观经济与开放经济 | 10 | 0 | 2 | 12 |
+| **合计** | **全课程教学计划** | **40** | **0** | **8** | **48** |`,
+
+    ideology: `# 06 课程思政典型案例
+
+| 序号 | 案例名称 | 所属章节 | 案例教学目标 | 案例教学内容 |
+|---|---|---|---|---|
+| 01 | 供求分析与理性决策 | 第一章 第1~3节 | 培养实事求是、尊重规律的决策意识 | 以粮食、能源价格变化为案例，区分事实判断与价值判断，理解市场信号与民生保障。 |
+| 02 | 公共政策与社会公平 | 第三章 第3节 | 建立公共责任与公平正义意识 | 讨论公共物品、外部性和税收政策，分析效率与公平之间的权衡。 |
+| 03 | 中国经济增长与全球合作 | 第四章 第1~3节 | 增强家国情怀与开放合作意识 | 结合中国经济增长、脱贫与国际贸易案例，理解改革发展成果和全球分工合作。 |`,
+
+    assessment: `# 07 课程考核与成绩评定细则
+
+## 考核构成与成绩占比
+- **出勤与课堂讨论**：占比 **10%**（课堂参与、案例发言与学习纪律）
+- **章节作业与阶段测验**：占比 **30%**（供求图形、弹性计算和政策分析）
+- **经济案例调研报告**：占比 **20%**（数据来源、分析过程、结论表达）
+- **期末综合考试**：占比 **40%**（评价全课程目标达成度）
+
+## 课程目标与考核映射关系
+- **课程目标 1** 对应考核：章节作业与阶段测验 (20%) + 期末考试 (20%)
+- **课程目标 2** 对应考核：案例调研报告 (12%) + 期末考试 (12%)
+- **课程目标 3** 对应考核：课堂讨论 (10%) + 案例调研报告 (8%) + 期末考试 (8%)`,
+
+    reference: `# 08 教材、参考书与审签信息
+
+## 主要教材
+- 格里高利·曼昆：《经济学原理》（第 8 版），北京大学出版社，2020。
+
+## 推荐参考书
+1. 保罗·萨缪尔森、威廉·诺德豪斯：《经济学》（第 19 版），人民邮电出版社。
+2. 高鸿业：《西方经济学（微观部分、宏观部分）》（第 8 版），中国人民大学出版社。
+3. 中国国家统计局：《中国统计年鉴》及年度宏观经济数据。
+
+## 大纲审签信息
+- **执笔教师**：林老师
+- **审阅负责人**：罗文秋
+- **审定负责人**：徐长波`
+  };
+
+  const defaultsForCourse = () => courseId() === 'economics'
+    ? Object.assign({}, defaultMdFields, economicsMdFields)
+    : defaultMdFields;
+
   const readJson = (key, fallback) => {
     try { const v = JSON.parse(localStorage.getItem(key) || 'null'); return v && typeof v === 'object' ? v : fallback; } catch { return fallback; }
   };
 
   const state = Object.assign({ active: 'basic', status: {}, mdMode: {} }, readJson(scopedKey(stateKey), {}));
-  const fields = Object.assign({}, defaultMdFields, readJson(scopedKey(fieldKey), {}));
+  const initialDefaults = defaultsForCourse();
+  const initialStoredFields = readJson(scopedKey(fieldKey), {});
+  const fields = Object.assign({}, initialDefaults, initialStoredFields);
+  if(scope === 'economics' && initialStoredFields.__economicsSeedV2 !== 'v3'){
+    Object.assign(fields, initialDefaults, economicsMdFields, {__economicsSeedV2:'v3'});
+    try { localStorage.setItem(scopedKey(fieldKey), JSON.stringify(fields)); } catch {}
+  }
 
   const syncScope = () => {
     const next = courseId();
@@ -178,7 +293,15 @@
     state.active = freshState.active || 'basic';
     state.status = Object.assign({}, freshState.status || {});
     const freshFields = readJson(scopedKey(fieldKey), {});
-    Object.assign(fields, defaultMdFields, freshFields);
+    const freshDefaults = defaultsForCourse();
+    // Seed economics sections once; legacy global-replacement content is not
+    // allowed to leak into the course-scoped syllabus store.
+    if(next === 'economics' && freshFields.__economicsSeedV2 !== 'v3'){
+      Object.assign(fields, freshDefaults, economicsMdFields, {__economicsSeedV2:'v3'});
+      try { localStorage.setItem(scopedKey(fieldKey), JSON.stringify(fields)); } catch {}
+    } else {
+      Object.assign(fields, freshDefaults, freshFields);
+    }
   };
 
   const statusNames = { done: '已完成', draft: 'AI 草稿', pending: '待补充', review: '待确认' };

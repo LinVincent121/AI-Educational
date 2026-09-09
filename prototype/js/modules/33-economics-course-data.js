@@ -19,8 +19,22 @@
     ['第 4 章备课草稿','第二章备课草稿'],['第 4 章 · 图论','第二章 · 市场结构'],['教学日历 v3 待审核','经济学教学日历 v1 待审核']
   ];
   replacements.sort((a,b)=>b[0].length-a[0].length);
-  const replace=s=>replacements.reduce((v,[a,b])=>v.split(a).join(b),String(s));
-  const apply=()=>{if(!isEconomics())return;const root=document.querySelector('#app')||document.body;const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);nodes.forEach(n=>{const next=replace(n.nodeValue);if(next!==n.nodeValue)n.nodeValue=next});root.querySelectorAll('input,textarea').forEach(el=>{if(el.value)el.value=replace(el.value);if(el.placeholder)el.placeholder=replace(el.placeholder)});root.querySelectorAll('[title],[aria-label]').forEach(el=>{if(el.title)el.title=replace(el.title);if(el.getAttribute('aria-label'))el.setAttribute('aria-label',replace(el.getAttribute('aria-label')))});};
+  // Identity rules (第一章→第一章 …) are no-ops; dropping them keeps them from
+  // receiving guard marks below.
+  const rules=replacements.filter(([a,b])=>a!==b);
+  const replacementMap=new Map(rules);
+  const escapeRe=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  // A rule output may itself contain another rule's input — worst case
+  // 关系→供求关系, whose output contains its own input. The observer re-scans
+  // after every mutation, so each pass used to match again and the text grew
+  // forever (供求供求供求…关系). Every input embedded in an output gets a
+  // zero-width word joiner (\u2060) in front of it, and the scan pattern
+  // refuses to match a guarded input, so re-applying the table is a no-op.
+  const GUARD='\u2060';
+  const protect=s=>rules.reduce((out,[src])=>out.replace(new RegExp(escapeRe(src),'g'),m=>GUARD+m),String(s));
+  const pattern=new RegExp('(?<!'+GUARD+')(?:'+rules.map(([a])=>escapeRe(a)).join('|')+')','g');
+  const replace=s=>{const source=String(s);if(!source)return source;return source.replace(pattern,match=>protect(replacementMap.get(match)||match))};
+  const apply=()=>{if(!isEconomics())return;const root=document.querySelector('#app')||document.body;const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);nodes.forEach(n=>{if(n.parentElement?.closest('.side-course-switch,#courseCards,.syllabus-3col-workspace'))return;const next=replace(n.nodeValue);if(next!==n.nodeValue)n.nodeValue=next});root.querySelectorAll('[title],[aria-label]').forEach(el=>{if(el.closest('.side-course-switch,#courseCards,.syllabus-3col-workspace'))return;if(el.title)el.title=replace(el.title);if(el.getAttribute('aria-label'))el.setAttribute('aria-label',replace(el.getAttribute('aria-label')))});};
   let applying=false;const run=()=>{if(applying)return;applying=true;try{apply()}finally{applying=false}};
-  const observer=new MutationObserver(run);observer.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',()=>setTimeout(run,30));setInterval(run,700);run();
+  const observer=new MutationObserver(run);observer.observe(document.body,{childList:true,subtree:true});window.addEventListener('hashchange',()=>setTimeout(run,30));run();
 })();
