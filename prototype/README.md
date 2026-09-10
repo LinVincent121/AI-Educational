@@ -7,7 +7,7 @@
 ## 当前版本
 
 - 缓存版本号：`20260910-04`
-- 模块数：33 个业务模块（`js/modules/`）+ 6 个核心文件（`js/core/`）；其中 `33-economics-course-data.js` 为经济学课程全模块数据适配层
+- 模块数：35 个业务模块（`js/modules/`）+ 6 个核心文件（`js/core/`）；其中 `33-economics-course-data.js` 为经济学课程全模块数据适配层
 - 校验：在 `prototype/` 下运行 `node tools/dev-check.mjs`
 
 ## 页面与模块完成度
@@ -19,12 +19,12 @@
 | 资料库 | `#materials` | 深演示 | 个人/共享知识空间、上传解析模拟、文件夹管理 |
 | 消息提醒 | `#notifications` | 浅演示 | 待办与已读 |
 | 系统设置 | `#settings` | 深演示 | 校历与周次、权限、模型信息（Mock 模式） |
-| 课程总览 | `#course/overview` | 中 | 状态统计、推荐操作、资产、快捷操作 |
+| 课程总览 | `#course/overview` | 深演示 | 课程信息 + 初始化状态 + 状态驱动推荐操作 + 待办 + AI 入口 + 最近活动 + 九宫格资产入口（`35-course-overview.js`） |
 | **教学大纲** | `#course/syllabus` | **深交互** | Markdown 编辑、划词 AI、专家讨论组评审 |
 | 教学日历 | `#course/calendar` | 深交互 | 16 周教学内容总表 + 排课日历 + AI 助手（多层历史增强） |
 | 备课工作台 | `#course/preparation` | 深交互 | Markdown 教案编辑、学术资料、专家讨论组评审 |
 | 课件制作 | `#course/courseware` | 深交互 | 章节卡片 → PPT 三栏画布 + 讲义，模板与页面元素化编辑 |
-| 作业管理 | `#course/assignment` | 深交互 | 题目为最小维护单位、新建/编辑/AI 生成/检查/预览 |
+| 作业管理 | `#course/assignment` | 深交互 | 作业知识库、来源比例配方、题目筛选、生成预览、来源追溯、章节作业与生成记录 |
 | 学生画像 | `#course/students` | 深演示 | 班级概况 / 学生分析 / 内容掌握 / 教学建议（Mock 聚合数据） |
 | 试卷管理 | `#course/exam` | 深交互 | 题库、试卷配置、AI 组卷、素材解析与预览 |
 | 版本与审核 | `#course/version-review` | 占位 | 基础面板 |
@@ -91,4 +91,6 @@ prototype/
 - 经济学原理的 16 周日历种子数据同样在 `19-teaching-calendar.js`（与离散数学种子完全隔离，按课程 id 分 key 存储）；`04-calendar-fidelity.js` 的 `targets` 维护各课程的学时基准（经济学 48 = 讲授 40 + 课程项目 8），新增课程时需同步补充，否则学时会被按离散基准重排。
 - 备课工作台（`27-preparation-workspace.js`）的 MD 教案草稿与学术资料同样按课程 id 分 key 存储（离散数学沿用 `ai-jiaowu-prep-workspace-v4*`，经济学为 `*-economics`）；两门课程各自维护默认教案、默认资料、备课单元切换条与 AI 助手文案，新增课程时需在该模块同步补充默认数据，且文案需避开 `33-economics-course-data.js` 替换层的源词（如“关系”“映射”），避免被二次替换。
 - 支持 `index.html?course=economics#course/...` 深链直接打开指定课程工作区（不带参数时行为不变）。
+- 课程总览（`35-course-overview.js`）为链式接管 overview 路由的独立模块，演示数据刻意与各模块既定事实对齐（大纲 8 区块、日历状态实时读取 localStorage，其余为静态演示数字）；修改其他模块的演示数据时需同步更新该模块的 `COURSES` 配置，避免总览数字与实际页面不一致。
+- 作业管理 v2（`34-assignment-knowledge-base.js`）的题目来源角色与比例配方为模块内静态 Mock；课程总览中展示的题库/知识库计数需与其保持一致口径。
 - `node tools/dev-check.mjs` 中重复 `window.*` 覆盖仅作 WARN，用于提示后续逐步收敛，不影响运行。
