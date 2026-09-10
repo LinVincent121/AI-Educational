@@ -57,7 +57,7 @@ prototype/
 ├─ index.html                 # 唯一入口：顶部全局导航 + #app + 全局弹窗壳；加载 core 脚本
 ├─ css/
 │  ├─ styles.css              # 全局设计变量(:root)与通用样式（薄荷绿 + 橙主按钮 + 蓝墨标题）
-│  └─ materials-library.css   # 资料库模块样式
+│  └─ materials-library.css   # 资料库全部样式（基础布局 + 系统视觉对齐，自 styles.css 抽离集中）
 ├─ js/
 │  ├─ core/
 │  │  ├─ 00-app-shell.js      # render() 路由、课程管理/资料库/消息/设置、openAI 弹窗
