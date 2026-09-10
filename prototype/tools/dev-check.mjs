@@ -3,12 +3,12 @@ import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const root = decodeURIComponent(new URL('../', import.meta.url).pathname).replace(/^\//, '').replace(/\//g, '\\');
-const index = readFileSync(resolve(root, 'index.html'), 'utf8');
+const index = readFileSync(resolve(root, 'Course-Management.html'), 'utf8');
 const loader = readFileSync(resolve(root, 'js', 'core', 'course-v2-loader.js'), 'utf8');
 const files = [...loader.matchAll(/'([^']+\.js)'/g)].map(([, file]) => file);
 const errors = [];
 
-if (!index.includes('css/styles.css')) errors.push('index.html 未加载 css/styles.css');
+if (!index.includes('css/styles.css')) errors.push('Course-Management.html 未加载 css/styles.css');
 for (const file of files) {
   const path = resolve(root, file);
   if (!existsSync(path)) errors.push(`loader 引用了不存在的文件: ${file}`);

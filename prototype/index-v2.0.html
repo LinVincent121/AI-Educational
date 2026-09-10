@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eduwork</title>
+<style>
+:root{
+  --bg:#f5f6f8;--surface:#fff;--line:#e5e7eb;--text:#1f2937;--muted:#6b7280;
+  --primary:#087c72;--primary-light:#e6f7f5;--primary-dark:#066b61;
+  --accent:#0ea5e9;--warn:#f59e0b;--danger:#ef4444;--success:#10b981;
+  --radius:10px;--shadow:0 1px 3px rgba(0,0,0,.08);
+  --shadow-window:0 24px 80px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.15);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;font-size:14px;line-height:1.6;user-select:none}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.18);border-radius:3px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ===== 桌面 ===== */
+.desktop{
+  position:fixed;inset:0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(8,124,114,.35), transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(14,165,233,.3), transparent 50%),
+    linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.desktop::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(255,255,255,.03) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;
+}
+.desktop-logo{
+  position:absolute;top:24px;left:32px;
+  display:flex;align-items:center;gap:10px;
+  color:rgba(255,255,255,.85);font-weight:700;font-size:18px;letter-spacing:.5px;
+  z-index:1;
+}
+.desktop-logo-icon{
+  width:36px;height:36px;border-radius:8px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:18px;font-weight:800;
+  box-shadow:0 4px 14px rgba(8,124,114,.4);
+}
+.desktop-hint{
+  position:absolute;bottom:80px;left:50%;transform:translateX(-50%);
+  color:rgba(255,255,255,.4);font-size:12px;letter-spacing:1px;
+  z-index:1;
+}
+
+/* 桌面图标 */
+.desktop-icons{
+  position:absolute;top:80px;left:32px;
+  display:flex;flex-direction:column;gap:24px;z-index:1;
+}
+.desktop-icon{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;padding:8px;border-radius:8px;transition:background .2s;
+  width:80px;
+}
+.desktop-icon:hover{background:rgba(255,255,255,.1)}
+.desktop-icon-img{
+  width:48px;height:48px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  box-shadow:0 4px 14px rgba(0,0,0,.3);
+}
+.desktop-icon-label{color:rgba(255,255,255,.8);font-size:11px;text-align:center}
+
+/* ===== 启动动画 ===== */
+.splash{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:24px;transition:opacity .5s,visibility .5s;
+}
+.splash.hidden{opacity:0;visibility:hidden}
+.splash-logo{
+  width:80px;height:80px;border-radius:18px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:40px;font-weight:800;
+  box-shadow:0 8px 32px rgba(8,124,114,.5);
+  animation:splashPulse 1.5s ease-in-out infinite;
+}
+.splash-name{color:#fff;font-size:22px;font-weight:700;letter-spacing:1px}
+.splash-loading{
+  width:200px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;
+}
+.splash-loading-bar{
+  height:100%;width:0;border-radius:2px;
+  background:linear-gradient(90deg,var(--primary),var(--accent));
+  animation:loading 1.8s ease-out forwards;
+}
+.splash-text{color:rgba(255,255,255,.5);font-size:12px}
+@keyframes splashPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes loading{0%{width:0}100%{width:100%}}
+
+/* ===== 应用窗口 ===== */
+.app-window{
+  width:1180px;height:760px;max-width:96vw;max-height:92vh;
+  background:var(--surface);border-radius:12px;
+  box-shadow:var(--shadow-window);
+  display:flex;flex-direction:column;overflow:hidden;
+  position:relative;z-index:10;
+  animation:windowOpen .4s cubic-bezier(.2,.8,.2,1);
+}
+.app-window.minimized{animation:windowMin .3s forwards;pointer-events:none}
+.app-window.maximized{width:100vw;height:100vh;max-width:100vw;max-height:100vh;border-radius:0}
+@keyframes windowOpen{
+  from{opacity:0;transform:scale(.92) translateY(20px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+@keyframes windowMin{
+  from{opacity:1;transform:scale(1)}
+  to{opacity:0;transform:scale(.7) translateY(400px)}
+}
+
+/* 标题栏 */
+.titlebar{
+  height:44px;flex-shrink:0;
+  background:var(--surface);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;padding:0 16px;
+  cursor:grab;user-select:none;
+  -webkit-app-region:drag;
+}
+.titlebar:active{cursor:grabbing}
+.titlebar-left{display:flex;align-items:center;gap:10px}
+.titlebar-logo{
+  width:24px;height:24px;border-radius:5px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:13px;font-weight:800;
+}
+.titlebar-name{font-weight:700;font-size:13px;color:var(--text)}
+.titlebar-name .ver{font-size:11px;color:var(--muted);font-weight:400;margin-left:4px}
+.titlebar-center{
+  flex:1;text-align:center;font-size:12px;color:var(--muted);
+  pointer-events:none;
+}
+.titlebar-controls{display:flex;gap:0;margin-left:auto;-webkit-app-region:no-drag}
+.win-btn{
+  width:36px;height:28px;border:none;background:transparent;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:var(--muted);border-radius:4px;transition:all .15s;
+}
+.win-btn:hover{background:var(--bg)}
+.win-btn.close:hover{background:var(--danger);color:#fff}
+
+/* 模式 Tab */
+.mode-tabs{
+  height:48px;flex-shrink:0;
+  background:var(--surface);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;padding:0 16px;gap:4px;
+}
+.mode-tab{
+  padding:8px 20px;border-radius:8px;cursor:pointer;
+  font-weight:600;font-size:13px;color:var(--muted);
+  transition:all .2s;border:none;background:transparent;
+  display:flex;align-items:center;gap:6px;
+}
+.mode-tab:hover{background:var(--bg)}
+.mode-tab.active{background:var(--primary);color:#fff}
+.mode-tab-icon{font-size:14px}
+.mode-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.notify-btn{position:relative;width:32px;height:32px;border-radius:6px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.notify-badge{position:absolute;top:0;right:0;width:16px;height:16px;background:var(--danger);color:#fff;border-radius:50%;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.user-info{display:flex;align-items:center;gap:6px;cursor:pointer;padding:4px 8px;border-radius:6px}
+.user-info:hover{background:var(--bg)}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.user-name{font-weight:600;font-size:12px}
+
+/* 主内容区 */
+.app-content{flex:1;overflow:hidden;position:relative}
+.mode-page{display:none;height:100%;width:100%}
+.mode-page.active{display:flex}
+
+/* ===== 对话模式 ===== */
+.chat-layout{display:flex;height:100%;width:100%;flex:1;min-height:0}
+.chat-sidebar{width:240px;background:#fafbfc;border-right:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0}
+.new-chat-btn{margin:12px;padding:10px 16px;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;justify-content:center}
+.new-chat-btn:hover{background:var(--primary-dark)}
+.chat-history{flex:1;overflow-y:auto;padding:0 8px 8px}
+.chat-history-section{font-size:11px;color:var(--muted);font-weight:600;padding:12px 8px 4px;text-transform:uppercase;letter-spacing:.5px}
+.chat-history-item{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text);transition:background .15s}
+.chat-history-item:hover{background:var(--bg)}
+.chat-history-item.active{background:var(--primary-light);color:var(--primary)}
+.chat-main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+.chat-header{padding:12px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:var(--surface)}
+.course-context{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.course-context select{padding:4px 8px;border:1px solid var(--line);border-radius:6px;font-size:12px;background:var(--surface)}
+.chat-messages{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px}
+.msg{max-width:80%;padding:14px 18px;border-radius:12px;font-size:14px;line-height:1.7}
+.msg-ai{background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px;align-self:flex-start;box-shadow:var(--shadow)}
+.msg-user{background:var(--primary);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+.msg-actions{margin-top:10px;display:flex;gap:8px}
+.msg-action-btn{padding:4px 12px;font-size:12px;border:1px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--muted)}
+.msg-action-btn:hover{background:var(--primary-light);color:var(--primary);border-color:var(--primary)}
+.chat-input-area{padding:16px 24px;border-top:1px solid var(--line);background:var(--surface)}
+.file-attachment{display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--primary-light);border-radius:6px;font-size:12px;color:var(--primary);margin-bottom:8px;width:fit-content}
+.chat-input-wrapper{display:flex;align-items:flex-end;gap:8px;border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--surface)}
+.chat-input-wrapper:focus-within{border-color:var(--primary)}
+.chat-input{flex:1;border:none;background:transparent;outline:none;font-size:14px;resize:none;max-height:120px;line-height:1.5}
+.attach-btn{width:32px;height:32px;border:none;background:transparent;cursor:pointer;font-size:18px;color:var(--muted);border-radius:6px}
+.attach-btn:hover{background:var(--bg)}
+.send-btn{padding:8px 20px;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px}
+.send-btn:hover{background:var(--primary-dark)}
+
+/* ===== 任务模式 ===== */
+.task-page{padding:24px;max-width:1000px;margin:0 auto;width:100%;height:100%;overflow-y:auto}
+
+/* 推荐技能 */
+.skill-rec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.skill-rec-card{display:flex;align-items:flex-start;gap:10px;padding:14px;background:linear-gradient(135deg,#fff,var(--primary-light));border:1px solid var(--line);border-radius:10px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.skill-rec-card:hover{border-color:var(--primary);box-shadow:0 4px 14px rgba(8,124,114,.15);transform:translateY(-2px)}
+.skill-rec-card.installed{background:linear-gradient(135deg,#fff,#d1fae5);border-color:var(--success)}
+.skill-rec-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.skill-rec-info{flex:1;min-width:0}
+.skill-rec-name{font-weight:700;font-size:13px;color:var(--text);display:flex;align-items:center;gap:6px}
+.skill-rec-badge{font-size:9px;padding:1px 6px;border-radius:3px;background:var(--accent);color:#fff;font-weight:600}
+.skill-rec-badge.chat{background:#8b5cf6}
+.skill-rec-badge.task{background:var(--primary)}
+.skill-rec-desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}
+.skill-rec-action{margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.skill-rec-install{padding:4px 12px;font-size:11px;font-weight:600;border:none;border-radius:6px;background:var(--primary);color:#fff;cursor:pointer}
+.skill-rec-install:hover{background:var(--primary-dark)}
+.skill-rec-install.installed{background:var(--success);cursor:default}
+.skill-rec-author{font-size:10px;color:var(--muted)}
+.section-row{display:flex;align-items:center;justify-content:space-between;margin:24px 0 12px}
+.section-row-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.section-row-link{font-size:12px;color:var(--primary);cursor:pointer;font-weight:600}
+.section-row-link:hover{text-decoration:underline}
+
+/* ===== 技能市场 模态对话框 ===== */
+.marketplace-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:50;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.marketplace-overlay.show{display:flex;animation:fadeOverlay .2s}
+@keyframes fadeOverlay{from{opacity:0}to{opacity:1}}
+.marketplace-dialog{
+  width:880px;max-width:92%;height:560px;max-height:88%;
+  background:var(--surface);border-radius:12px;
+  box-shadow:0 24px 80px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.15);
+  display:flex;flex-direction:column;overflow:hidden;
+  animation:dialogOpen .25s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes dialogOpen{from{opacity:0;transform:scale(.96) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.marketplace-header{padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-shrink:0;-webkit-app-region:drag}
+.marketplace-back{display:none}
+.marketplace-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.marketplace-title-icon{font-size:16px}
+.marketplace-search{flex:1;padding:8px 14px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none;background:var(--bg)}
+.marketplace-search:focus{border-color:var(--primary);background:var(--surface)}
+.marketplace-filters{display:flex;gap:6px;flex-shrink:0}
+.marketplace-filter{padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer;font-size:12px;font-weight:600;color:var(--muted)}
+.marketplace-filter.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.marketplace-close{width:30px;height:30px;border:none;background:transparent;cursor:pointer;font-size:16px;color:var(--muted);border-radius:6px;-webkit-app-region:no-drag;display:flex;align-items:center;justify-content:center}
+.marketplace-close:hover{background:var(--danger);color:#fff}
+.marketplace-body{flex:1;overflow-y:auto;padding:20px}
+.marketplace-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.marketplace-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;cursor:pointer;transition:all .2s;position:relative}
+.marketplace-card:hover{border-color:var(--primary);box-shadow:0 4px 14px rgba(0,0,0,.1);transform:translateY(-2px)}
+.marketplace-card.installed{border-color:var(--success);background:linear-gradient(135deg,#fff,#d1fae5)}
+.mp-card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;padding-right:36px}
+.mp-card-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:var(--primary-light)}
+.mp-card-info{flex:1;min-width:0}
+.mp-card-name{font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.mp-card-type{font-size:9px;padding:2px 6px;border-radius:3px;font-weight:600}
+.mp-card-type.chat{background:#ede9fe;color:#6d28d9}
+.mp-card-type.task{background:var(--primary-light);color:var(--primary)}
+.mp-card-author{font-size:11px;color:var(--muted);margin-top:2px}
+.mp-card-desc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.mp-card-meta{display:flex;gap:12px;font-size:11px;color:var(--muted);margin-bottom:0}
+.mp-card-meta-item{display:flex;align-items:center;gap:3px}
+.mp-card-action{position:absolute;top:14px;right:14px;width:28px;height:28px;padding:0;border:1.5px solid var(--primary);border-radius:50%;font-weight:400;font-size:18px;line-height:1;cursor:pointer;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;transition:all .15s;box-shadow:0 2px 6px rgba(8,124,114,.3)}
+.mp-card-action:hover{background:var(--primary-dark);border-color:var(--primary-dark);transform:scale(1.1)}
+.mp-card-action.installed{border-color:var(--success);background:var(--success);color:#fff;cursor:default}
+.mp-card-action.installed::before{content:''}
+
+/* 对话模式 - 已启用技能 */
+.chat-skills{padding:12px 8px;border-top:1px solid var(--line);flex-shrink:0}
+.chat-skills-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding:0 4px;display:flex;align-items:center;justify-content:space-between}
+.chat-skills-manage{font-size:10px;color:var(--primary);cursor:pointer;font-weight:600}
+.chat-skill-item{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px;transition:background .15s}
+.chat-skill-item:hover{background:var(--bg)}
+.chat-skill-item.active{background:var(--primary-light);color:var(--primary)}
+.chat-skill-icon{font-size:14px}
+.chat-skill-toggle{width:28px;height:16px;border-radius:8px;background:var(--success);position:relative;flex-shrink:0;transition:background .2s}
+.chat-skill-toggle::after{content:'';position:absolute;top:2px;left:14px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left .2s}
+.chat-skill-toggle.off{background:#d1d5db}
+.chat-skill-toggle.off::after{left:2px}
+.task-new-btn{padding:8px 16px;border:none;border-radius:8px;background:var(--primary);color:#fff;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:all .2s;flex-shrink:0}
+.task-new-btn:hover{background:var(--primary-dark)}
+.section-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:24px 0 12px}
+
+/* 任务模式 - 两列布局 */
+.task-layout{display:flex;gap:16px;height:100%;width:100%;max-width:1100px;margin:0 auto;padding:20px;overflow:hidden}
+.task-main-col{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.task-side-col{width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:16px;overflow:hidden;padding-right:2px}
+
+/* 主列：任务队列 */
+.task-main-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-shrink:0}
+.task-main-title{font-size:14px;font-weight:700;color:var(--muted)}
+
+/* 新建任务 - 对话框形式 */
+.task-composer{margin-bottom:16px;flex-shrink:0;border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;transition:border-color .2s}
+.task-composer:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(8,124,114,.1)}
+.task-composer-input{width:100%;border:none;outline:none;background:transparent;padding:14px 16px 8px;font-size:13px;font-family:inherit;resize:none;min-height:60px;line-height:1.5}
+.task-composer-input::placeholder{color:var(--muted)}
+.task-composer-toolbar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 8px;gap:8px}
+.task-composer-left{display:flex;align-items:center;gap:4px}
+.task-composer-right{display:flex;align-items:center;gap:8px}
+.tc-icon-btn{width:28px;height:28px;border:none;background:transparent;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--muted);transition:all .15s}
+.tc-icon-btn:hover{background:var(--bg);color:var(--primary)}
+.tc-icon-btn.attach{font-size:18px;font-weight:400}
+.tc-media-group{display:flex;gap:2px;margin-left:4px}
+.tc-media-btn{width:24px;height:24px;border:none;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff}
+.tc-media-btn.video{background:#8b5cf6}
+.tc-media-btn.image{background:#8b5cf6}
+.tc-media-btn.doc{background:var(--primary)}
+.tc-mode{font-size:11px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:2px;padding:3px 6px;border-radius:6px}
+.tc-mode:hover{background:var(--bg)}
+.tc-mic{width:26px;height:26px;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--muted);border-radius:6px}
+.tc-mic:hover{color:var(--primary)}
+.tc-send{width:30px;height:30px;border:none;border-radius:8px;background:var(--primary);color:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.tc-send:hover{background:var(--primary-dark)}
+
+/* 紧凑任务行 */
+.task-row{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;transition:all .15s;cursor:pointer}
+.task-row:hover{border-color:var(--primary);background:var(--primary-light)}
+.task-row+.task-row{margin-top:4px}
+.task-row-status{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.task-row-status.running{background:var(--primary);box-shadow:0 0 0 3px rgba(8,124,114,.18)}
+.task-row-status.queued{background:var(--muted)}
+.task-row-status.done{background:var(--success)}
+.task-row-status.failed{background:var(--danger)}
+.task-row-body{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
+.task-row-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-row-meta{font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.task-row-meta .sep{color:var(--line);margin:0 2px}
+.task-row-progress{width:60px;height:3px;background:var(--bg);border-radius:2px;overflow:hidden;flex-shrink:0}
+.task-row-progress-bar{height:100%;border-radius:2px;transition:width .5s}
+.task-row-actions{display:flex;gap:4px;flex-shrink:0}
+.task-row-btn{padding:2px 8px;font-size:10px;border:1px solid var(--line);border-radius:4px;background:var(--surface);cursor:pointer;color:var(--muted)}
+.task-row-btn:hover{border-color:var(--primary);color:var(--primary)}
+.task-row-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* 任务队列分组 - 折叠式 */
+.task-group{margin-bottom:8px}
+.task-group-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:0 2px;cursor:pointer;user-select:none}
+.task-group-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:4px}
+.task-group-arrow{font-size:9px;color:var(--muted);transition:transform .2s}
+.task-group.collapsed .task-group-arrow{transform:rotate(-90deg)}
+.task-group.collapsed .task-group-list{display:none}
+.task-group-count{font-size:10px;color:var(--muted);background:var(--bg);padding:1px 7px;border-radius:8px}
+.task-group-list{display:flex;flex-direction:column}
+
+/* 侧列：任务模板 + 推荐技能（弱化，各自滚动） */
+.side-section{display:flex;flex-direction:column;min-height:0;flex-shrink:0}
+.side-section.max-h{flex:1;min-height:0}
+.side-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-shrink:0}
+.side-section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.side-section-link{font-size:11px;color:var(--primary);cursor:pointer;font-weight:600}
+.side-section-link:hover{text-decoration:underline}
+
+/* 弱化的任务模板 */
+.tpl-list-scroll{flex:1;overflow-y:auto;min-height:0}
+.tpl-list{display:flex;flex-direction:column;gap:4px}
+.tpl-item{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border:1px solid transparent;border-radius:7px;cursor:pointer;font-size:12px;color:var(--text);transition:all .15s;background:transparent}
+.tpl-item:hover{background:var(--bg);border-color:var(--line)}
+.tpl-item-icon{font-size:14px;flex-shrink:0;opacity:.7;margin-top:1px}
+.tpl-item-body{flex:1;min-width:0}
+.tpl-item-name{font-weight:500;font-size:12px}
+.tpl-item-desc{font-size:10px;color:var(--muted);margin-top:1px;line-height:1.3}
+
+/* 弱化的推荐技能 */
+.skill-mini-scroll{flex:1;overflow-y:auto;min-height:0}
+.skill-mini-list{display:flex;flex-direction:column;gap:6px}
+.skill-mini{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid transparent;border-radius:7px;cursor:pointer;transition:all .15s}
+.skill-mini:hover{background:var(--bg);border-color:var(--line)}
+.skill-mini-icon{font-size:14px;flex-shrink:0}
+.skill-mini-info{flex:1;min-width:0}
+.skill-mini-name{font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px}
+.skill-mini-badge{font-size:8px;padding:1px 4px;border-radius:3px;font-weight:600;color:#fff}
+.skill-mini-badge.task{background:var(--primary)}
+.skill-mini-badge.chat{background:#8b5cf6}
+.skill-mini-desc{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skill-mini-install{width:20px;height:20px;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--muted);cursor:pointer;flex-shrink:0;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.skill-mini-install:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+.skill-mini-install.installed{border-color:var(--success);color:var(--success);cursor:default}
+.template-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.queue-group{margin-bottom:16px}
+.queue-header{display:flex;align-items:center;justify-content:space-between;padding:8px 0;cursor:pointer}
+.queue-title{font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px}
+.queue-count{background:var(--bg);color:var(--muted);font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+.queue-list{border-radius:10px;overflow:hidden}
+.task-card{padding:12px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .15s}
+.task-card:hover{box-shadow:var(--shadow)}
+.task-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.task-name{font-weight:600;font-size:13px;display:flex;align-items:center;gap:6px}
+.task-course{font-size:11px;color:var(--muted)}
+.task-progress{height:6px;background:var(--bg);border-radius:3px;overflow:hidden;margin:8px 0}
+.task-progress-bar{height:100%;border-radius:3px;transition:width .5s}
+.task-progress-bar.running{background:var(--primary)}
+.task-progress-bar.queued{background:var(--muted)}
+.task-progress-bar.done{background:var(--success)}
+.task-progress-bar.failed{background:var(--danger)}
+.task-meta{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted)}
+.task-actions{display:flex;gap:6px;margin-top:8px}
+.task-action-btn{padding:4px 10px;font-size:11px;border:1px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--muted)}
+.task-action-btn:hover{border-color:var(--primary);color:var(--primary)}
+.task-action-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ===== 教学模式 ===== */
+.teach-page{padding:24px;max-width:1000px;margin:0 auto;width:100%;height:100%;overflow-y:auto}
+.teach-greeting{font-size:20px;font-weight:700;margin-bottom:2px}
+.teach-date{font-size:13px;color:var(--muted);margin-bottom:20px}
+.stat-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .2s}
+.stat-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);transform:translateY(-2px)}
+.stat-value{font-size:24px;font-weight:800;color:var(--primary)}
+.stat-label{font-size:11px;color:var(--muted);margin-top:4px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.section-header h2{font-size:15px;font-weight:700}
+.section-link{font-size:12px;color:var(--primary);cursor:pointer;text-decoration:none}
+.course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:24px}
+.course-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;transition:all .2s}
+.course-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.1);transform:translateY(-2px)}
+.course-name{font-size:14px;font-weight:700;margin-bottom:6px}
+.course-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.course-tag{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--bg);color:var(--muted)}
+.course-tag.version{background:var(--primary-light);color:var(--primary)}
+.course-tag.role{background:#fef3c7;color:#92400e}
+.course-tag.status-active{background:#d1fae5;color:#065f46}
+.course-tag.status-draft{background:#fef3c7;color:#92400e}
+.course-enter{font-size:12px;color:var(--primary);font-weight:600}
+.course-card.new{display:flex;align-items:center;justify-content:center;border:2px dashed var(--line);color:var(--muted)}
+.course-card.new:hover{border-color:var(--primary);color:var(--primary)}
+.dual-panel{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.todo-item{display:flex;align-items:flex-start;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.todo-item:last-child{border-bottom:none}
+.todo-icon{font-size:16px;flex-shrink:0}
+.todo-content{flex:1}
+.todo-title{font-size:13px;font-weight:600}
+.todo-meta{font-size:11px;color:var(--muted)}
+.todo-go{font-size:12px;color:var(--primary);cursor:pointer;white-space:nowrap}
+.task-mini{padding:10px 0;border-bottom:1px solid var(--line)}
+.task-mini:last-child{border-bottom:none}
+.task-mini-header{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600}
+.task-mini-progress{height:4px;background:var(--bg);border-radius:2px;margin:6px 0}
+.task-mini-bar{height:100%;border-radius:2px;background:var(--primary)}
+.recent-item{display:flex;align-items:center;gap:8px;padding:8px 0;font-size:13px;cursor:pointer}
+.recent-item:hover{color:var(--primary)}
+.recent-icon{font-size:16px;flex-shrink:0}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.quick-btn{padding:12px;background:var(--primary-light);border:1px solid var(--primary);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--primary);display:flex;align-items:center;justify-content:center;gap:6px}
+.quick-btn:hover{background:var(--primary);color:#fff}
+
+/* ===== 任务栏 ===== */
+.taskbar{
+  position:fixed;bottom:0;left:0;right:0;height:56px;
+  background:rgba(15,23,42,.85);backdrop-filter:blur(20px);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  z-index:100;border-top:1px solid rgba(255,255,255,.1);
+}
+.taskbar-start{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 16px;border-radius:8px;cursor:pointer;
+  color:rgba(255,255,255,.9);font-size:13px;font-weight:600;
+  transition:background .2s;
+}
+.taskbar-start:hover{background:rgba(255,255,255,.1)}
+.taskbar-start-icon{
+  width:28px;height:28px;border-radius:6px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:14px;font-weight:800;
+}
+.taskbar-apps{display:flex;gap:8px;margin-left:16px}
+.taskbar-app{
+  width:40px;height:40px;border-radius:8px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;position:relative;transition:all .2s;
+  background:rgba(255,255,255,.05);
+}
+.taskbar-app:hover{background:rgba(255,255,255,.15);transform:translateY(-4px)}
+.taskbar-app.active::after{
+  content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:var(--primary);
+}
+.taskbar-clock{
+  margin-left:auto;padding:6px 16px;
+  color:rgba(255,255,255,.8);font-size:12px;text-align:center;
+}
+
+/* 最小化后的任务栏图标 */
+.minimized-icon{
+  width:40px;height:40px;border-radius:8px;cursor:pointer;
+  display:none;align-items:center;justify-content:center;
+  font-size:20px;position:relative;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  animation:bounceIn .3s;
+}
+.minimized-icon.show{display:flex}
+.minimized-icon:hover{transform:translateY(-4px)}
+@keyframes bounceIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* 窗口失焦效果 */
+.app-window.unfocused{box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.app-window.unfocused .titlebar{background:#f9fafb}
+
+/* 动画 */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.typing-dot{display:inline-block;width:6px;height:6px;background:var(--muted);border-radius:50%;margin:0 2px;animation:pulse 1.4s infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}
+.typing-dot:nth-child(3){animation-delay:.4s}
+</style>
+</head>
+<body>
+
+<!-- ===== 启动动画 ===== -->
+<div class="splash" id="splash">
+  <div class="splash-logo">E</div>
+  <div class="splash-name">Eduwork</div>
+  <div class="splash-loading"><div class="splash-loading-bar"></div></div>
+  <div class="splash-text">正在加载教学智能体工作台...</div>
+</div>
+
+<!-- ===== 桌面 ===== -->
+<div class="desktop" id="desktop">
+
+  <!-- 桌面左上角 Logo -->
+  <div class="desktop-logo">
+    <div class="desktop-logo-icon">E</div>
+    Eduwork
+  </div>
+
+  <!-- 桌面图标 -->
+  <div class="desktop-icons">
+    <div class="desktop-icon" ondblclick="restoreApp()">
+      <div class="desktop-icon-img">E</div>
+      <div class="desktop-icon-label">Eduwork</div>
+    </div>
+  </div>
+
+  <div class="desktop-hint">双击桌面图标启动应用 · 拖拽标题栏移动窗口</div>
+
+  <!-- ===== 应用窗口 ===== -->
+  <div class="app-window" id="appWindow">
+
+    <!-- 标题栏 -->
+    <div class="titlebar" id="titlebar">
+      <div class="titlebar-left">
+        <div class="titlebar-logo">E</div>
+        <span class="titlebar-name">Eduwork <span class="ver">v1.0</span></span>
+      </div>
+      <div class="titlebar-center" id="titlebarCenter">对话模式</div>
+      <div class="titlebar-controls">
+        <button class="win-btn" onclick="minimizeApp()" title="最小化">─</button>
+        <button class="win-btn" onclick="toggleMaximize()" title="最大化/还原">▢</button>
+        <button class="win-btn close" onclick="closeApp()" title="关闭">✕</button>
+      </div>
+    </div>
+
+    <!-- 模式 Tab -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="chat" onclick="switchMode('chat')">
+        <span class="mode-tab-icon">💬</span>对话
+      </button>
+      <button class="mode-tab" data-mode="task" onclick="switchMode('task')">
+        <span class="mode-tab-icon">⚙</span>任务
+      </button>
+      <button class="mode-tab" data-mode="teach" onclick="switchMode('teach')">
+        <span class="mode-tab-icon">📚</span>教学
+      </button>
+      <div class="mode-right">
+        <button class="notify-btn" onclick="location.href='Course-Management.html#materials'" title="知识库" style="width:auto;padding:0 12px;gap:4px;font-size:13px;font-weight:600;color:var(--text)">📚 知识库</button>
+        <button class="notify-btn" onclick="openMarketplace()" title="技能市场" style="width:auto;padding:0 12px;gap:4px;font-size:13px;font-weight:600;color:var(--primary)">🧩 技能市场</button>
+        <button class="notify-btn">🔔<span class="notify-badge">3</span></button>
+        <div class="user-info" onclick="alert('用户中心')">
+          <div class="user-avatar">林</div>
+          <span class="user-name">林老师</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="app-content">
+
+      <!-- ===== 对话模式 ===== -->
+      <div class="mode-page active" id="mode-chat">
+        <div class="chat-layout">
+          <div class="chat-sidebar">
+            <button class="new-chat-btn" onclick="newChat()">＋ 新对话</button>
+            <div class="chat-history">
+              <div class="chat-history-section">今天</div>
+              <div class="chat-history-item active">备课片段改写</div>
+              <div class="chat-history-item">案例：供给弹性</div>
+              <div class="chat-history-section">昨天</div>
+              <div class="chat-history-item">大纲结构优化</div>
+              <div class="chat-history-item">一流课程申报材料</div>
+              <div class="chat-history-section">本周</div>
+              <div class="chat-history-item">思政元素融入</div>
+              <div class="chat-history-item">期末出题思路</div>
+              <div class="chat-history-item">成绩分析建议</div>
+            </div>
+            <!-- 已启用技能 -->
+            <div class="chat-skills" id="chatSkills" style="display:none">
+              <div class="chat-skills-title">
+                <span>已启用技能</span>
+                <span class="chat-skills-manage" onclick="openMarketplace()">管理</span>
+              </div>
+              <div id="chatSkillsList"></div>
+            </div>
+          </div>
+          <div class="chat-main">
+            <div class="chat-header">
+              <div class="course-context">
+                <span>当前课程：</span>
+                <select>
+                  <option>经济学原理</option>
+                  <option>统计学</option>
+                  <option>财务管理</option>
+                </select>
+              </div>
+              <span style="font-size:12px;color:var(--muted)">已挂载：经济学原理.pdf</span>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+              <div class="msg msg-ai">
+                您好，林老师。当前已挂载《经济学原理》教材。有什么可以帮您？
+              </div>
+              <div class="msg msg-user">
+                帮我生成一个关于供给价格弹性的教学案例，要求贴近学生生活
+              </div>
+              <div class="msg msg-ai">
+                好的，基于您挂载的《经济学原理》教材第 3 章，我为您生成以下教学案例：
+                <br><br>
+                <b>【案例：智能手机的供给价格弹性】</b><br><br>
+                2024 年国产手机品牌在中端市场（1500-3000 元）展开激烈价格战。以某品牌为例，当售价从 2500 元降至 1999 元时，月出货量从 80 万台增至 120 万台。<br><br>
+                <b>讨论问题：</b><br>
+                1. 计算该品牌手机的供给价格弹性系数<br>
+                2. 分析中端手机市场供给弹性较大的原因（产能调整灵活、技术门槛相对较低）<br>
+                3. 与高端市场（6000 元+）对比，供给弹性有何差异？为什么？<br><br>
+                <b>教学建议：</b>可结合学生手机消费经验讨论，引导理解"供给弹性受产能调整时间影响"这一知识点。
+                <div class="msg-actions">
+                  <button class="msg-action-btn">💾 保存到备课草稿</button>
+                  <button class="msg-action-btn">📎 存入课程资料</button>
+                  <button class="msg-action-btn">📋 复制</button>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input-area">
+              <div class="file-attachment">📎 已附加：经济学原理.pdf（教材）</div>
+              <div class="chat-input-wrapper">
+                <button class="attach-btn" onclick="alert('选择本地文件')">📎</button>
+                <textarea class="chat-input" id="chatInput" placeholder="输入消息... (Enter 发送, Shift+Enter 换行)" rows="1" onkeydown="handleEnter(event)"></textarea>
+                <button class="send-btn" onclick="sendMessage()">发送</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 任务模式 ===== -->
+      <div class="mode-page" id="mode-task">
+        <div class="task-layout">
+          <!-- 主列：新建任务 + 任务队列 -->
+          <div class="task-main-col">
+            <!-- 新建任务 - 对话框形式 -->
+            <div class="task-composer">
+              <textarea class="task-composer-input" placeholder="描述任务，如：解析经济学原理.pdf 生成第3章备课草稿"></textarea>
+              <div class="task-composer-toolbar">
+                <div class="task-composer-left">
+                  <button class="tc-icon-btn attach" title="附加文件" onclick="alert('附加文件')">+</button>
+                  <div class="tc-media-group">
+                    <button class="tc-media-btn video" title="视频" onclick="alert('视频输入')">▶</button>
+                    <button class="tc-media-btn image" title="图片" onclick="alert('图片输入')">🖼</button>
+                    <button class="tc-media-btn doc" title="文档" onclick="alert('文档输入')">📄</button>
+                  </div>
+                </div>
+                <div class="task-composer-right">
+                  <span class="tc-mode" onclick="alert('切换模式')">自动模式 ⌄</span>
+                  <button class="tc-mic" title="语音输入" onclick="alert('语音输入')">🎙</button>
+                  <button class="tc-send" title="提交任务" onclick="alert('提交任务')">➤</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="task-main-head">
+              <span class="task-main-title">任务队列</span>
+            </div>
+
+            <div style="flex:1;overflow-y:auto;min-height:0">
+              <!-- 进行中 -->
+              <div class="task-group">
+                <div class="task-group-head" onclick="toggleTaskGroup(this)">
+                  <span class="task-group-arrow">▼</span>
+                  <span class="task-group-title">● 进行中</span>
+                  <span class="task-group-count">2</span>
+                </div>
+                <div class="task-group-list">
+                  <div class="task-row">
+                    <div class="task-row-status running"></div>
+                    <div class="task-row-body">
+                      <div class="task-row-name">大纲生成</div>
+                      <span class="task-row-meta">经济学原理<span class="sep">·</span>还需 2 分钟</span>
+                    </div>
+                    <div class="task-row-progress"><div class="task-row-progress-bar running" style="width:80%;background:var(--primary)"></div></div>
+                    <div class="task-row-actions">
+                      <button class="task-row-btn">详情</button>
+                      <button class="task-row-btn">取消</button>
+                    </div>
+                  </div>
+                  <div class="task-row">
+                    <div class="task-row-status running"></div>
+                    <div class="task-row-body">
+                      <div class="task-row-name">第3章备课草稿</div>
+                      <span class="task-row-meta">经济学原理<span class="sep">·</span>还需 4 分钟</span>
+                    </div>
+                    <div class="task-row-progress"><div class="task-row-progress-bar running" style="width:60%;background:var(--primary)"></div></div>
+                    <div class="task-row-actions">
+                      <button class="task-row-btn">详情</button>
+                      <button class="task-row-btn">取消</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 排队 -->
+              <div class="task-group">
+                <div class="task-group-head" onclick="toggleTaskGroup(this)">
+                  <span class="task-group-arrow">▼</span>
+                  <span class="task-group-title">⏸ 排队</span>
+                  <span class="task-group-count">1</span>
+                </div>
+                <div class="task-group-list">
+                  <div class="task-row">
+                    <div class="task-row-status queued"></div>
+                    <div class="task-row-body">
+                      <div class="task-row-name">案例集解析</div>
+                      <span class="task-row-meta">财务管理<span class="sep">·</span>等待中</span>
+                    </div>
+                    <div class="task-row-actions">
+                      <button class="task-row-btn">取消</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 已完成 -->
+              <div class="task-group">
+                <div class="task-group-head" onclick="toggleTaskGroup(this)">
+                  <span class="task-group-arrow">▼</span>
+                  <span class="task-group-title">✓ 已完成</span>
+                  <span class="task-group-count">3</span>
+                </div>
+                <div class="task-group-list">
+                  <div class="task-row">
+                    <div class="task-row-status done"></div>
+                    <div class="task-row-body">
+                      <div class="task-row-name">第1章备课草稿</div>
+                      <span class="task-row-meta">经济学原理<span class="sep">·</span>2小时前</span>
+                    </div>
+                    <div class="task-row-actions">
+                      <button class="task-row-btn primary">打开</button>
+                    </div>
+                  </div>
+                  <div class="task-row">
+                    <div class="task-row-status done"></div>
+                    <div class="task-row-body">
+                      <div class="task-row-name">学情摘要</div>
+                      <span class="task-row-meta">经济学原理<span class="sep">·</span>昨天</span>
+                    </div>
+                    <div class="task-row-actions">
+                      <button class="task-row-btn primary">打开</button>
+                    </div>
+                  </div>
+                  <div class="task-row">
+                    <div class="task-row-status done"></div>
+                    <div class="task-row-body">
+                      <div class="task-row-name">批量出题</div>
+                      <span class="task-row-meta">统计学<span class="sep">·</span>前天</span>
+                    </div>
+                    <div class="task-row-actions">
+                      <button class="task-row-btn primary">打开</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 失败 -->
+              <div class="task-group">
+                <div class="task-group-head" onclick="toggleTaskGroup(this)">
+                  <span class="task-group-arrow">▼</span>
+                  <span class="task-group-title">✗ 失败</span>
+                  <span class="task-group-count">1</span>
+                </div>
+                <div class="task-group-list">
+                  <div class="task-row">
+                    <div class="task-row-status failed"></div>
+                    <div class="task-row-body">
+                      <div class="task-row-name">大纲生成</div>
+                      <span class="task-row-meta" style="color:var(--danger)">财务管理 · PDF解析超时<span class="sep">·</span>3小时前</span>
+                    </div>
+                    <div class="task-row-actions">
+                      <button class="task-row-btn primary">重试</button>
+                      <button class="task-row-btn">日志</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 侧列：任务模板 + 推荐技能（弱化） -->
+          <div class="task-side-col">
+            <!-- 任务模板 -->
+            <div class="side-section max-h">
+              <div class="side-section-head">
+                <span class="side-section-title">任务模板</span>
+              </div>
+              <div class="tpl-list-scroll">
+              <div class="tpl-list">
+                <div class="tpl-item" onclick="alert('选择模板：教材解析')">
+                  <span class="tpl-item-icon">📚</span>
+                  <div class="tpl-item-body">
+                    <div class="tpl-item-name">教材解析</div>
+                    <div class="tpl-item-desc">PDF 转结构化知识图谱</div>
+                  </div>
+                </div>
+                <div class="tpl-item" onclick="alert('选择模板：生成大纲')">
+                  <span class="tpl-item-icon">📋</span>
+                  <div class="tpl-item-body">
+                    <div class="tpl-item-name">生成大纲</div>
+                    <div class="tpl-item-desc">基于教材生成教学大纲</div>
+                  </div>
+                </div>
+                <div class="tpl-item" onclick="alert('选择模板：章节备课')">
+                  <span class="tpl-item-icon">📝</span>
+                  <div class="tpl-item-body">
+                    <div class="tpl-item-name">章节备课</div>
+                    <div class="tpl-item-desc">章节内容生成教案草稿</div>
+                  </div>
+                </div>
+                <div class="tpl-item" onclick="alert('选择模板：案例集解析')">
+                  <span class="tpl-item-icon">📊</span>
+                  <div class="tpl-item-body">
+                    <div class="tpl-item-name">案例集解析</div>
+                    <div class="tpl-item-desc">案例标签化与归档</div>
+                  </div>
+                </div>
+                <div class="tpl-item" onclick="alert('选择模板：学情摘要')">
+                  <span class="tpl-item-icon">📈</span>
+                  <div class="tpl-item-body">
+                    <div class="tpl-item-name">学情摘要</div>
+                    <div class="tpl-item-desc">成绩数据生成分析报告</div>
+                  </div>
+                </div>
+                <div class="tpl-item" onclick="alert('选择模板：批量出题')">
+                  <span class="tpl-item-icon">✏️</span>
+                  <div class="tpl-item-body">
+                    <div class="tpl-item-name">批量出题</div>
+                    <div class="tpl-item-desc">知识点自动生成题目集</div>
+                  </div>
+                </div>
+                <!-- 非教学任务模板 -->
+                <div class="tpl-item" onclick="alert('选择模板：合并表格')">
+                  <span class="tpl-item-icon">📋</span>
+                  <div class="tpl-item-body">
+                    <div class="tpl-item-name">合并表格</div>
+                    <div class="tpl-item-desc">多份成绩表合并去重</div>
+                  </div>
+                </div>
+                <div class="tpl-item" onclick="alert('选择模板：格式转换')">
+                  <span class="tpl-item-icon">🔄</span>
+                  <div class="tpl-item-body">
+                    <div class="tpl-item-name">格式转换</div>
+                    <div class="tpl-item-desc">PDF/Word/Excel 互转</div>
+                  </div>
+                </div>
+                <div class="tpl-item" onclick="alert('选择模板：数据清洗')">
+                  <span class="tpl-item-icon">🧹</span>
+                  <div class="tpl-item-body">
+                    <div class="tpl-item-name">数据清洗</div>
+                    <div class="tpl-item-desc">成绩表去重补漏标格式</div>
+                  </div>
+                </div>
+                <div class="tpl-item" onclick="alert('选择模板：文档摘要')">
+                  <span class="tpl-item-icon">📄</span>
+                  <div class="tpl-item-body">
+                    <div class="tpl-item-name">文档摘要</div>
+                    <div class="tpl-item-desc">长文档一键生成摘要</div>
+                  </div>
+                </div>
+              </div>
+              </div>
+            </div>
+
+            <!-- 推荐技能 -->
+            <div class="side-section max-h">
+              <div class="side-section-head">
+                <span class="side-section-title">推荐技能</span>
+                <span class="side-section-link" onclick="openMarketplace()">全部 →</span>
+              </div>
+              <div class="skill-mini-scroll">
+              <div class="skill-mini-list">
+                <div class="skill-mini" id="mini-paper">
+                  <span class="skill-mini-icon">📝</span>
+                  <div class="skill-mini-info">
+                    <div class="skill-mini-name">期末试卷生成 <span class="skill-mini-badge task">任务</span></div>
+                    <div class="skill-mini-desc">自动生成完整试卷</div>
+                  </div>
+                  <button class="skill-mini-install" onclick="installSkillMini('paper')" title="安装">+</button>
+                </div>
+                <div class="skill-mini" id="mini-declare">
+                  <span class="skill-mini-icon">🎯</span>
+                  <div class="skill-mini-info">
+                    <div class="skill-mini-name">课程申报辅助 <span class="skill-mini-badge task">任务</span></div>
+                    <div class="skill-mini-desc">生成申报材料初稿</div>
+                  </div>
+                  <button class="skill-mini-install" onclick="installSkillMini('declare')" title="安装">+</button>
+                </div>
+                <div class="skill-mini" id="mini-sizheng">
+                  <span class="skill-mini-icon">🧭</span>
+                  <div class="skill-mini-info">
+                    <div class="skill-mini-name">思政元素检测 <span class="skill-mini-badge chat">对话</span></div>
+                    <div class="skill-mini-desc">检测思政融入点</div>
+                  </div>
+                  <button class="skill-mini-install" onclick="installSkillMini('sizheng')" title="安装">+</button>
+                </div>
+                <div class="skill-mini" id="mini-academic">
+                  <span class="skill-mini-icon">✅</span>
+                  <div class="skill-mini-info">
+                    <div class="skill-mini-name">学术规范检查 <span class="skill-mini-badge chat">对话</span></div>
+                    <div class="skill-mini-desc">检测学术表达规范</div>
+                  </div>
+                  <button class="skill-mini-install" onclick="installSkillMini('academic')" title="安装">+</button>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 教学模式 ===== -->
+      <div class="mode-page" id="mode-teach">
+        <div class="teach-page">
+          <div class="teach-greeting">早上好，林老师</div>
+          <div class="teach-date">2026 秋季学期 · 第 3 周 · 周三</div>
+
+          <div class="stat-bar">
+            <div class="stat-card" onclick="alert('课程列表')"><div class="stat-value">3</div><div class="stat-label">进行中课程</div></div>
+            <div class="stat-card" onclick="alert('待办列表')"><div class="stat-value">5</div><div class="stat-label">待处理事项</div></div>
+            <div class="stat-card" onclick="switchMode('task')"><div class="stat-value">2</div><div class="stat-label">AI 任务中</div></div>
+            <div class="stat-card" onclick="alert('资料库')"><div class="stat-value">28</div><div class="stat-label">课程资料</div></div>
+          </div>
+
+          <div class="section-header"><h2>我的课程</h2></div>
+          <div class="course-grid">
+            <div class="course-card" onclick="location.href='Course-Management.html?course=economics#course/overview'">
+              <div class="course-name">经济学原理</div>
+              <div class="course-meta">
+                <span class="course-tag version">v1</span>
+                <span class="course-tag role">任课教师</span>
+                <span class="course-tag status-active">有效</span>
+              </div>
+              <div class="course-enter">进入课程 →</div>
+            </div>
+            <div class="course-card" onclick="location.href='Course-Management.html?course=discrete#course/overview'">
+              <div class="course-name">离散数学</div>
+              <div class="course-meta">
+                <span class="course-tag version">v2</span>
+                <span class="course-tag role">课程负责人</span>
+                <span class="course-tag status-active">有效</span>
+              </div>
+              <div class="course-enter">进入课程 →</div>
+            </div>
+            <div class="course-card" onclick="alert('进入财务管理课程空间')">
+              <div class="course-name">财务管理</div>
+              <div class="course-meta">
+                <span class="course-tag version">v1</span>
+                <span class="course-tag role">任课教师</span>
+                <span class="course-tag status-draft">草稿</span>
+              </div>
+              <div class="course-enter">进入课程 →</div>
+            </div>
+            <div class="course-card new" onclick="alert('创建新课程')">
+              <span>＋ 创建课程</span>
+            </div>
+          </div>
+
+          <div class="dual-panel">
+            <div class="panel">
+              <div class="section-header"><h2>待办事项</h2></div>
+              <div class="todo-item">
+                <span class="todo-icon">⚠</span>
+                <div class="todo-content">
+                  <div class="todo-title">教学日历 v3 待审核</div>
+                  <div class="todo-meta">经济学原理 · 截止今天</div>
+                </div>
+                <span class="todo-go" onclick="alert('处理日历审核')">去处理→</span>
+              </div>
+              <div class="todo-item">
+                <span class="todo-icon">⚠</span>
+                <div class="todo-content">
+                  <div class="todo-title">成绩导入 warning</div>
+                  <div class="todo-meta">统计学 · 46/50 条已通过</div>
+                </div>
+                <span class="todo-go" onclick="alert('处理成绩校验')">去处理→</span>
+              </div>
+              <div class="todo-item">
+                <span class="todo-icon">📝</span>
+                <div class="todo-content">
+                  <div class="todo-title">备课草稿待处理</div>
+                  <div class="todo-meta">经济学原理 · 第4章</div>
+                </div>
+                <span class="todo-go" onclick="alert('处理备课草稿')">去处理→</span>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="section-header">
+                <h2>异步任务</h2>
+                <span class="section-link" onclick="switchMode('task')">前往任务模式 →</span>
+              </div>
+              <div class="task-mini">
+                <div class="task-mini-header">
+                  <span>● 大纲生成</span>
+                  <span style="color:var(--primary);font-size:11px">80%</span>
+                </div>
+                <div class="task-mini-progress"><div class="task-mini-bar" style="width:80%"></div></div>
+                <div style="font-size:11px;color:var(--muted)">预计还需 2 分钟</div>
+              </div>
+              <div class="task-mini">
+                <div class="task-mini-header">
+                  <span>● 第3章备课</span>
+                  <span style="color:var(--primary);font-size:11px">60%</span>
+                </div>
+                <div class="task-mini-progress"><div class="task-mini-bar" style="width:60%"></div></div>
+                <div style="font-size:11px;color:var(--muted)">预计还需 4 分钟</div>
+              </div>
+              <div class="task-mini">
+                <div class="task-mini-header">
+                  <span style="color:var(--muted)">⏸ 案例集解析</span>
+                  <span style="color:var(--muted);font-size:11px">排队</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dual-panel">
+            <div class="panel">
+              <div class="section-header"><h2>最近使用</h2></div>
+              <div class="recent-item" onclick="alert('打开第4章备课')">
+                <span class="recent-icon">📄</span>
+                <span>第4章 · 供给与需求（备课）</span>
+              </div>
+              <div class="recent-item" onclick="alert('打开教学大纲')">
+                <span class="recent-icon">📋</span>
+                <span>教学大纲 v2（经济学原理）</span>
+              </div>
+              <div class="recent-item" onclick="alert('打开成绩明细')">
+                <span class="recent-icon">📊</span>
+                <span>成绩明细（统计学）</span>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="section-header"><h2>快捷操作</h2></div>
+              <div class="quick-actions">
+                <div class="quick-btn" onclick="alert('创建课程')">＋ 创建课程</div>
+                <div class="quick-btn" onclick="alert('上传资料')">⬆ 上传资料</div>
+                <div class="quick-btn" onclick="switchMode('task')">✦ 生成大纲</div>
+                <div class="quick-btn" onclick="alert('导入成绩')">⇧ 导入成绩</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== 技能市场 模态对话框 ===== -->
+    <div class="marketplace-overlay" id="marketplace" onclick="if(event.target===this)closeMarketplace()">
+      <div class="marketplace-dialog">
+        <div class="marketplace-header">
+          <span class="marketplace-title"><span class="marketplace-title-icon">🧩</span>技能市场</span>
+          <input class="marketplace-search" placeholder="🔍 搜索技能..." oninput="filterMarketplace(this.value)">
+          <div class="marketplace-filters">
+            <button class="marketplace-filter active" onclick="filterMarketplaceType(this,'all')">全部</button>
+            <button class="marketplace-filter" onclick="filterMarketplaceType(this,'task')">任务模板</button>
+            <button class="marketplace-filter" onclick="filterMarketplaceType(this,'chat')">对话增强</button>
+          </div>
+          <button class="marketplace-close" onclick="closeMarketplace()" title="关闭">✕</button>
+        </div>
+        <div class="marketplace-body">
+          <div class="marketplace-grid" id="marketplaceGrid"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 最小化后的任务栏图标 -->
+  <div class="minimized-icon" id="minimizedIcon" onclick="restoreApp()" title="点击恢复窗口">E</div>
+
+</div>
+
+<!-- ===== 任务栏 ===== -->
+<div class="taskbar">
+  <div class="taskbar-start" onclick="alert('开始菜单')">
+    <div class="taskbar-start-icon">E</div>
+    Eduwork
+  </div>
+  <div class="taskbar-apps">
+    <div class="taskbar-app active" onclick="restoreApp()" title="Eduwork">📚</div>
+    <div class="taskbar-app" onclick="alert('文件管理器')" title="文件">📁</div>
+    <div class="taskbar-app" onclick="alert('设置')" title="设置">⚙</div>
+  </div>
+  <div class="taskbar-clock" id="clock">--:--<br>2026/09/10</div>
+</div>
+
+<script>
+// ===== 启动动画 =====
+setTimeout(()=>{
+  document.getElementById('splash').classList.add('hidden');
+},2000);
+
+// ===== 模式切换 =====
+const modeNames={chat:'对话模式',task:'任务模式',teach:'教学模式'};
+function switchMode(mode){
+  document.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`.mode-tab[data-mode="${mode}"]`).classList.add('active');
+  document.querySelectorAll('.mode-page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('mode-'+mode).classList.add('active');
+  document.getElementById('titlebarCenter').textContent=modeNames[mode];
+}
+
+// ===== 窗口控制 =====
+function minimizeApp(){
+  const win=document.getElementById('appWindow');
+  win.classList.add('minimized');
+  setTimeout(()=>{
+    win.style.display='none';
+    document.getElementById('minimizedIcon').classList.add('show');
+  },300);
+}
+function restoreApp(){
+  const win=document.getElementById('appWindow');
+  if(win.classList.contains('minimized')){
+    win.style.display='flex';
+    win.classList.remove('minimized');
+    document.getElementById('minimizedIcon').classList.remove('show');
+  }
+}
+function toggleMaximize(){
+  const win=document.getElementById('appWindow');
+  win.classList.toggle('maximized');
+}
+function closeApp(){
+  if(confirm('确认关闭 Eduwork？')){
+    document.getElementById('appWindow').style.display='none';
+    document.getElementById('desktop-hint','').textContent='应用已关闭。双击桌面图标重新启动。';
+  }
+}
+
+// ===== 拖拽移动 =====
+const titlebar=document.getElementById('titlebar');
+const appWindow=document.getElementById('appWindow');
+let isDragging=false,startX,startY,initialX,initialY;
+
+titlebar.addEventListener('mousedown',e=>{
+  if(e.target.classList.contains('win-btn'))return;
+  if(appWindow.classList.contains('maximized'))return;
+  isDragging=true;
+  startX=e.clientX;startY=e.clientY;
+  const rect=appWindow.getBoundingClientRect();
+  initialX=rect.left;initialY=rect.top;
+  document.addEventListener('mousemove',dragMove);
+  document.addEventListener('mouseup',dragEnd);
+  appWindow.style.transition='none';
+});
+function dragMove(e){
+  if(!isDragging)return;
+  const dx=e.clientX-startX;
+  const dy=e.clientY-startY;
+  appWindow.style.position='fixed';
+  appWindow.style.left=initialX+dx+'px';
+  appWindow.style.top=initialY+dy+'px';
+  appWindow.style.transform='none';
+  appWindow.style.margin='0';
+}
+function dragEnd(){
+  isDragging=false;
+  appWindow.style.transition='';
+  document.removeEventListener('mousemove',dragMove);
+  document.removeEventListener('mouseup',dragEnd);
+}
+
+// ===== 对话交互 =====
+function newChat(){alert('新建对话')}
+function sendMessage(){
+  const input=document.getElementById('chatInput');
+  const msg=input.value.trim();
+  if(!msg)return;
+  const msgs=document.getElementById('chatMessages');
+  msgs.innerHTML+=`<div class="msg msg-user">${msg}</div>`;
+  input.value='';
+  msgs.innerHTML+=`<div class="msg msg-ai"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+  setTimeout(()=>{
+    msgs.lastChild.innerHTML='AI 正在生成回复...<div class="msg-actions"><button class="msg-action-btn">💾 保存</button><button class="msg-action-btn">📎 存入资料</button></div>';
+  },1500);
+}
+function handleEnter(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}
+}
+function toggleGroup(el){
+  const list=el.nextElementSibling;
+  list.style.display=list.style.display==='none'?'block':'none';
+}
+
+// 折叠任务队列分组
+function toggleTaskGroup(headEl){
+  const group = headEl.parentElement;
+  group.classList.toggle('collapsed');
+}
+
+// ===== 时钟 =====
+function updateClock(){
+  const now=new Date();
+  const h=String(now.getHours()).padStart(2,'0');
+  const m=String(now.getMinutes()).padStart(2,'0');
+  const date=now.getFullYear()+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+String(now.getDate()).padStart(2,'0');
+  document.getElementById('clock').innerHTML=h+':'+m+'<br>'+date;
+}
+updateClock();
+setInterval(updateClock,1000);
+
+// ===== 窗口失焦效果 =====
+document.getElementById('desktop').addEventListener('click',e=>{
+  if(e.target.id==='desktop'){
+    appWindow.classList.add('unfocused');
+  }
+});
+appWindow.addEventListener('click',()=>{
+  appWindow.classList.remove('unfocused');
+});
+
+// ===== 技能市场数据 =====
+const SKILLS = [
+  {id:'paper',icon:'📝',name:'期末试卷生成',type:'task',author:'官方',rating:4.8,installs:'1.2k',desc:'基于知识点图谱和难度系数，自动生成完整期末试卷，含客观题、主观题及参考答案与评分标准。',installed:false},
+  {id:'declare',icon:'🎯',name:'一流课程申报辅助',type:'task',author:'官方',rating:4.7,installs:'856',desc:'汇总课程大纲、教学日历、教案和学情数据，按教育部一流课程申报模板生成申报材料初稿。',installed:false},
+  {id:'sizheng',icon:'🧭',name:'思政元素检测',type:'chat',author:'官方',rating:4.6,installs:'2.1k',desc:'对话时自动检测教案和课件中的思政融入点，提示可补充的思政元素和切入角度。',installed:false},
+  {id:'academic',icon:'✅',name:'学术规范检查',type:'chat',author:'社区',rating:4.5,installs:'643',desc:'对话中实时检测学术表达的规范性，识别口语化表达、不规范引用和逻辑漏洞。',installed:false},
+  {id:'case',icon:'💡',name:'案例库构建',type:'task',author:'官方',rating:4.7,installs:'1.5k',desc:'从教材、论文和新闻中自动抽取教学案例，按学科、知识点、难度标签化归档。',installed:false},
+  {id:'rubric',icon:'📊',name:'量规生成器',type:'task',author:'社区',rating:4.4,installs:'412',desc:'基于作业类型和学习目标，自动生成评估量规（Rubric），含维度、等级和描述。',installed:false},
+  {id:'plagiarism',icon:'🔍',name:'查重预警',type:'chat',author:'社区',rating:4.3,installs:'389',desc:'对话中检测学生作业可能的抄袭风险，标记高度相似的段落并提供出处线索。',installed:false},
+  {id:'accessibility',icon:'♿',name:'无障碍检查',type:'chat',author:'社区',rating:4.2,installs:'201',desc:'检查课件和教案的无障碍性，提示图片缺少 alt 文本、颜色对比度不足等问题。',installed:false},
+  {id:'oer',icon:'🌐',name:'开放教育资源',type:'task',author:'官方',rating:4.6,installs:'780',desc:'从国家智慧教育平台等 OER 库检索与知识点匹配的开放教学资源。',installed:false},
+  {id:'reflection',icon:'📖',name:'教学反思助手',type:'chat',author:'官方',rating:4.5,installs:'534',desc:'课后对话时引导教师进行结构化教学反思（What/So what/Now what 模型）。',installed:false}
+];
+
+let installedSkills = new Set();
+let currentFilter = 'all';
+
+// 渲染技能市场
+function renderMarketplace(){
+  const grid = document.getElementById('marketplaceGrid');
+  const filtered = SKILLS.filter(s=>{
+    if(currentFilter!=='all' && s.type!==currentFilter) return false;
+    return true;
+  });
+  grid.innerHTML = filtered.map(s=>`
+    <div class="marketplace-card ${s.installed?'installed':''}" id="mp-${s.id}">
+      <div class="mp-card-head">
+        <div class="mp-card-icon">${s.icon}</div>
+        <div class="mp-card-info">
+          <div class="mp-card-name">${s.name} <span class="mp-card-type ${s.type}">${s.type==='chat'?'对话增强':'任务模板'}</span></div>
+          <div class="mp-card-author">${s.author} · ⭐${s.rating} · ${s.installs} 安装</div>
+        </div>
+      </div>
+      <div class="mp-card-desc">${s.desc}</div>
+      <div class="mp-card-meta">
+        <span class="mp-card-meta-item">📊 ${s.installs} 次安装</span>
+        <span class="mp-card-meta-item">⭐ ${s.rating}</span>
+      </div>
+      <button class="mp-card-action ${s.installed?'installed':''}" onclick="installSkill('${s.id}','mp')" title="${s.installed?'已安装':'安装'}">${s.installed?'✓':'+'}</button>
+    </div>
+  `).join('');
+}
+
+// 打开/关闭市场
+function openMarketplace(){
+  renderMarketplace();
+  document.getElementById('marketplace').classList.add('show');
+}
+function closeMarketplace(){
+  document.getElementById('marketplace').classList.remove('show');
+}
+// Esc 关闭
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeMarketplace();
+});
+
+// 搜索过滤
+function filterMarketplace(query){
+  const grid = document.getElementById('marketplaceGrid');
+  const q = query.toLowerCase();
+  const filtered = SKILLS.filter(s=>{
+    if(currentFilter!=='all' && s.type!==currentFilter) return false;
+    if(q && !s.name.toLowerCase().includes(q) && !s.desc.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  grid.innerHTML = filtered.map(s=>`
+    <div class="marketplace-card ${s.installed?'installed':''}" id="mp-${s.id}">
+      <div class="mp-card-head">
+        <div class="mp-card-icon">${s.icon}</div>
+        <div class="mp-card-info">
+          <div class="mp-card-name">${s.name} <span class="mp-card-type ${s.type}">${s.type==='chat'?'对话增强':'任务模板'}</span></div>
+          <div class="mp-card-author">${s.author} · ⭐${s.rating} · ${s.installs} 安装</div>
+        </div>
+      </div>
+      <div class="mp-card-desc">${s.desc}</div>
+      <div class="mp-card-meta">
+        <span class="mp-card-meta-item">📊 ${s.installs} 次安装</span>
+        <span class="mp-card-meta-item">⭐ ${s.rating}</span>
+      </div>
+      <button class="mp-card-action ${s.installed?'installed':''}" onclick="installSkill('${s.id}','mp')" title="${s.installed?'已安装':'安装'}">${s.installed?'✓':'+'}</button>
+    </div>
+  `).join('');
+}
+
+// 类型过滤
+function filterMarketplaceType(btn,type){
+  document.querySelectorAll('.marketplace-filter').forEach(f=>f.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = type;
+  const searchInput = document.querySelector('.marketplace-search');
+  filterMarketplace(searchInput.value);
+}
+
+// 安装技能
+function installSkill(id,source){
+  const skill = SKILLS.find(s=>s.id===id);
+  if(!skill || skill.installed) return;
+  skill.installed = true;
+  installedSkills.add(id);
+
+  // 更新市场卡片
+  const mpCard = document.getElementById('mp-'+id);
+  if(mpCard){
+    mpCard.classList.add('installed');
+    const btn = mpCard.querySelector('.mp-card-action');
+    btn.classList.add('installed');
+    btn.textContent = '✓';
+    btn.title = '已安装';
+  }
+
+  // 更新推荐卡片（旧版兼容）
+  const recCard = document.getElementById('rec-'+id);
+  if(recCard){
+    recCard.classList.add('installed');
+    const btn = recCard.querySelector('.skill-rec-install');
+    btn.classList.add('installed');
+    btn.textContent = '已安装';
+  }
+
+  // 更新侧栏 mini 卡片
+  const miniCard = document.getElementById('mini-'+id);
+  if(miniCard){
+    const btn = miniCard.querySelector('.skill-mini-install');
+    btn.classList.add('installed');
+    btn.textContent = '✓';
+    btn.title = '已安装';
+  }
+
+  // 更新对话侧边栏
+  updateChatSkills();
+
+  alert(`已安装「${skill.name}」\n\n${skill.type==='task'?'该技能已添加到任务模式模板列表。':'该技能已在对话模式启用，对话时将自动调用。'}`);
+}
+
+// 侧栏 mini 安装
+function installSkillMini(id){
+  installSkill(id,'mini');
+}
+
+// 更新对话侧边栏已启用技能
+function updateChatSkills(){
+  const chatSkills = document.getElementById('chatSkills');
+  const list = document.getElementById('chatSkillsList');
+  const chatSkillsInstalled = SKILLS.filter(s=>s.installed && s.type==='chat');
+
+  if(chatSkillsInstalled.length===0){
+    chatSkills.style.display = 'none';
+    return;
+  }
+
+  chatSkills.style.display = 'block';
+  list.innerHTML = chatSkillsInstalled.map(s=>`
+    <div class="chat-skill-item active" onclick="toggleSkill('${s.id}',this)">
+      <span class="chat-skill-icon">${s.icon}</span>
+      <span style="flex:1">${s.name}</span>
+      <div class="chat-skill-toggle"></div>
+    </div>
+  `).join('');
+}
+
+// 切换技能启用状态
+function toggleSkill(id,el){
+  const toggle = el.querySelector('.chat-skill-toggle');
+  toggle.classList.toggle('off');
+  el.classList.toggle('active');
+}
+
+</script>
+</body>
+</html>

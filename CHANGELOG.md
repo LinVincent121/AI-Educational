@@ -1,5 +1,12 @@
 # 更新记录
 
+## 2026-09-10 · 引入甲方首页并接入课程系统（文件重命名）
+
+- 引入甲方提供的首页文件并重命名为 `index-v2.0.html` 作为系统首页（原 `eduwork-desktop v0.5.html`，Eduwork 桌面版：对话 / 任务 / 教学三个模式），先只做跳转链接、不做样式改动。
+- 跳转接入：首页右上角"知识库"按钮跳转 `Course-Management.html#materials`（资料库页面）；"教学"页我的课程中"经济学原理"卡片跳转 `Course-Management.html?course=economics#course/overview`、"离散数学"卡片跳转 `Course-Management.html?course=discrete#course/overview`（进入对应课程的完整工作区：课程总览、教学大纲、教学日历等）。
+- 课程管理系统入口 `index.html` 重命名为 `Course-Management.html`（git mv 保留历史）；`tools/dev-check.mjs` 入口文件名同步适配。
+- 改名审查：全项目无残留的 `index.html` 功能性引用（JS 仅存历史注释），页面间跳转、hash 路由与 `?course=` 深链均正常；README 入口说明与目录结构同步更新。
+
 ## 2026-09-10 · 资料库样式抽离为独立文件（页面与交互保持原状）
 
 - 说明：此前一次提交曾把资料库做成独立 HTML 页面（materials.html），不符合预期，已通过 revert 撤销——`#materials` 路由、顶栏入口、页面跳转与交互全部保持原状。

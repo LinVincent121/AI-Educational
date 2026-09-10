@@ -2,7 +2,7 @@
 
 可离线浏览的前端原型。页面使用 Mock 数据，不连接后端、数据库或教务系统；交互状态（草稿、编辑内容、排序等）写入浏览器 localStorage。
 
-**入口**：解压后直接双击 `index.html` 即可浏览（无需安装依赖/启动服务）。
+**入口**：`index-v2.0.html` 为系统首页（甲方提供的 Eduwork 桌面版），解压后直接双击打开即可（无需安装依赖/启动服务）；课程管理系统入口为 `Course-Management.html`。
 
 ## 当前版本
 
@@ -54,7 +54,8 @@ home` | 浅演示 | 课程概览 / 待办 / 异步任务 / 快捷操作 |#home` 
 
 ```text
 prototype/
-├─ index.html                 # 唯一入口：顶部全局导航 + #app + 全局弹窗壳；加载 core 脚本
+├─ index-v2.0.html            # 系统首页（甲方 Eduwork 桌面版）：对话/任务/教学三个模式；右上角知识库跳转资料库，教学页课程卡跳转对应课程
+├─ Course-Management.html     # 课程管理系统：顶部全局导航 + #app + 全局弹窗壳；加载 core 脚本（原 index.html）
 ├─ css/
 │  ├─ styles.css              # 全局设计变量(:root)与通用样式（薄荷绿 + 橙主按钮 + 蓝墨标题）
 │  └─ materials-library.css   # 资料库全部样式（基础布局 + 系统视觉对齐，自 styles.css 抽离集中）
@@ -76,7 +77,7 @@ prototype/
 2. 课程内页面经 `window.coursePage(key)` 分发；新模块捕获旧 `window.coursePage` 再按 key 转发（链式覆盖）。
 3. 弹窗统一走居中模态；样式用模块前缀（如 `.cm-*`、`.syl-*`），不要用无前缀的裸全局选择器污染他页。
 4. localStorage key 统一前缀 `ai-jiaowu-`；跨课程数据带课程 id 后缀。
-5. 改动 JS 后同步递增 loader 与 index.html 中的 `?v=` 版本号。
+5. 改动 JS 后同步递增 loader 与 Course-Management.html 中的 `?v=` 版本号。
 6. 完成后运行 `node tools/dev-check.mjs`，并回归相邻页面（大纲 ⇄ 日历 ⇄ 备课 ⇄ 课件等）。
 
 ## 数据与 Mock
@@ -90,7 +91,7 @@ prototype/
 - 教学日历页面为多层历史增强叠加，最终路由由 `js/modules/19-teaching-calendar.js` 接管；如需修改请以该文件为准，避免与历史装饰逻辑冲突。
 - 经济学原理的 16 周日历种子数据同样在 `19-teaching-calendar.js`（与离散数学种子完全隔离，按课程 id 分 key 存储）；`04-calendar-fidelity.js` 的 `targets` 维护各课程的学时基准（经济学 48 = 讲授 40 + 课程项目 8），新增课程时需同步补充，否则学时会被按离散基准重排。
 - 备课工作台（`27-preparation-workspace.js`）的 MD 教案草稿与学术资料同样按课程 id 分 key 存储（离散数学沿用 `ai-jiaowu-prep-workspace-v4*`，经济学为 `*-economics`）；两门课程各自维护默认教案、默认资料、备课单元切换条与 AI 助手文案，新增课程时需在该模块同步补充默认数据，且文案需避开 `33-economics-course-data.js` 替换层的源词（如“关系”“映射”），避免被二次替换。
-- 支持 `index.html?course=economics#course/...` 深链直接打开指定课程工作区（不带参数时行为不变）。
+- 支持 `Course-Management.html?course=economics#course/...` 深链直接打开指定课程工作区（不带参数时行为不变）；index-v2.0.html 首页的课程卡片即通过该深链进入对应课程。
 - 首页（`#home`）已按要求移除：顶栏不再显示“首页”入口，无 hash 打开与未知路由均回落到课程管理页（`#courses`）。
 - 课程总览（`35-course-overview.js`）为链式接管 overview 路由的独立模块，演示数据刻意与各模块既定事实对齐（大纲 8 区块、日历状态实时读取 localStorage，其余为静态演示数字）；修改其他模块的演示数据时需同步更新该模块的 `COURSES` 配置，避免总览数字与实际页面不一致。
 - 作业管理 v2（`34-assignment-knowledge-base.js`）的题目来源角色与比例配方为模块内静态 Mock；课程总览中展示的题库/知识库计数需与其保持一致口径。
