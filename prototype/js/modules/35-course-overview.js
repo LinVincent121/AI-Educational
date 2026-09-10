@@ -82,10 +82,10 @@
   function recommend() {
     const d = facts(), cal = liveCalendarStatus();
     const state = { material: 'ready', structure: 'confirmed', kb: 'ready', syllabus: 'approved', calendar: cal, grades: true };
-    if (state.material === 'not_started') return { main: ['上传主教材', '#materials'], sub: null };
-    if (state.material === 'processing') return { main: ['查看资料处理进度', '#materials'], sub: ['返回课程列表', '#courses'] };
-    if (state.structure !== 'confirmed') return { main: ['确认教材目录', '#materials'], sub: ['查看解析异常', '#notifications'] };
-    if (state.syllabus === 'not_created') return { main: ['生成教学大纲', '#course/syllabus'], sub: ['查看课程资料', '#materials'] };
+    if (state.material === 'not_started') return { main: ['上传主教材', 'materials.html'], sub: null };
+    if (state.material === 'processing') return { main: ['查看资料处理进度', 'materials.html'], sub: ['返回课程列表', '#courses'] };
+    if (state.structure !== 'confirmed') return { main: ['确认教材目录', 'materials.html'], sub: ['查看解析异常', '#notifications'] };
+    if (state.syllabus === 'not_created') return { main: ['生成教学大纲', '#course/syllabus'], sub: ['查看课程资料', 'materials.html'] };
     if (state.syllabus === 'draft') return { main: ['继续编辑大纲', '#course/syllabus'], sub: ['运行大纲检查', '#course/syllabus'] };
     if (state.syllabus === 'pending_review') return { main: ['查看大纲审核任务', '#course/version-review'], sub: ['查看审核意见', '#notifications'] };
     if (state.calendar === 'not_created') return { main: ['生成教学日历', '#course/calendar'], sub: ['查看正式大纲', '#course/syllabus'] };
@@ -188,10 +188,10 @@
       ['📋', '作业管理', esc(d.assignment), '知识库', '#course/assignment'],
       ['📄', '试卷管理', esc(d.exam), '待审核', '#course/exam'],
       ['📈', '成绩与学情', `均分 ${esc(d.learningAvg)} · 及格率 ${esc(d.learningPass)} · ${esc(d.learningNote)}`, 'ok', '#course/students'],
-      ['▤', '课程资料库', esc(d.materials), 'ok', '#materials'],
+      ['▤', '课程资料库', esc(d.materials), 'ok', 'materials.html'],
       ['⚖️', '版本与审核', esc(d.review), '审核', '#course/version-review']
     ].map(a => `<a class="ov-asset" href="${a[4]}"><div class="ov-asset-top"><b><em>${a[0]}</em>${a[1]}</b><span class="tag ${a[3] === 'ok' ? 'ok' : ''}">${a[3]}</span></div><small>${a[2]}</small><span class="ov-asset-status">进入 →</span></a>`).join('');
-    return `<div class="ov-page">${hero}${init}${stats}<div class="ov-grid"><div><section class="ov-panel"><div class="ov-panel-head"><h2>下一步推荐操作</h2><span style="color:#8aa5a0;font-size:10px">由课程状态计算</span></div><div class="ov-panel-body">${recBlock}</div></section><section class="ov-panel"><div class="ov-panel-head"><h2>待办事项</h2><a href="#notifications">查看消息 →</a></div><div class="ov-panel-body">${todoList}</div></section></div><div><section class="ov-panel"><div class="ov-panel-head"><h2>课程 AI 助手</h2><span class="tag">对话入口</span></div><div class="ov-panel-body ov-ai"><p class="ov-ai-desc">面向本课程的 AI 对话入口，可基于大纲、日历、备课与学情数据生成建议草稿；所有输出均标记来源并需教师确认。</p><div class="ov-ai-quick"><button onclick="openAI('汇总本周教学安排与待办风险')">汇总本周教学安排与待办风险 <span>→</span></button><button onclick="openAI('基于学情数据生成教学建议')">基于学情数据生成教学建议 <span>→</span></button><button onclick="openAI('检查教学日历与大纲的一致性')">检查教学日历与大纲的一致性 <span>→</span></button></div></div></section><section class="ov-panel"><div class="ov-panel-head"><h2>最近活动</h2><a href="#notifications">全部记录 →</a></div><div class="ov-panel-body ov-activity">${activityList}</div></section></div></div><section class="ov-panel"><div class="ov-panel-head"><h2>课程资产与教学流程</h2><a href="#materials">资料库 →</a></div><div class="ov-panel-body ov-assets">${assets}</div></section></div>`;
+    return `<div class="ov-page">${hero}${init}${stats}<div class="ov-grid"><div><section class="ov-panel"><div class="ov-panel-head"><h2>下一步推荐操作</h2><span style="color:#8aa5a0;font-size:10px">由课程状态计算</span></div><div class="ov-panel-body">${recBlock}</div></section><section class="ov-panel"><div class="ov-panel-head"><h2>待办事项</h2><a href="#notifications">查看消息 →</a></div><div class="ov-panel-body">${todoList}</div></section></div><div><section class="ov-panel"><div class="ov-panel-head"><h2>课程 AI 助手</h2><span class="tag">对话入口</span></div><div class="ov-panel-body ov-ai"><p class="ov-ai-desc">面向本课程的 AI 对话入口，可基于大纲、日历、备课与学情数据生成建议草稿；所有输出均标记来源并需教师确认。</p><div class="ov-ai-quick"><button onclick="openAI('汇总本周教学安排与待办风险')">汇总本周教学安排与待办风险 <span>→</span></button><button onclick="openAI('基于学情数据生成教学建议')">基于学情数据生成教学建议 <span>→</span></button><button onclick="openAI('检查教学日历与大纲的一致性')">检查教学日历与大纲的一致性 <span>→</span></button></div></div></section><section class="ov-panel"><div class="ov-panel-head"><h2>最近活动</h2><a href="#notifications">全部记录 →</a></div><div class="ov-panel-body ov-activity">${activityList}</div></section></div></div><section class="ov-panel"><div class="ov-panel-head"><h2>课程资产与教学流程</h2><a href="materials.html">资料库 →</a></div><div class="ov-panel-body ov-assets">${assets}</div></section></div>`;
   }
 
   function draw() {

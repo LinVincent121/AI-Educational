@@ -1,5 +1,12 @@
 # 更新记录
 
+## 2026-09-10 · 资料库抽离为独立单文件 materials.html
+
+- 新增 `prototype/materials.html`：资料库独立版，样式（styles.css + materials-library.css）与脚本全部内联，双击即可单独打开使用；目录树、搜索、上传解析模拟、新建文件夹等交互与原路由完全一致，localStorage 数据与主原型同源共享，顶栏提供"返回课程管理"入口。
+- 主原型移除资料库：顶栏"▤ 资料库"入口与 `#materials` 路由分支删除（直达该 hash 回落课程管理页）；`00-app-shell.js` 中资料库状态/渲染/交互代码块、`js/core/04-materials-alignment.js`、`css/materials-library.css` 随迁移除。
+- 课程总览（`35-course-overview.js`、`00-course-base.js`）中的资料库入口改为跳转独立文件 `materials.html`。
+- README 页面清单与目录结构同步更新；`00-app-shell.js` 缓存版本递增至 `20260910-06`。
+
 ## 2026-09-10 · 移除首页页面与顶栏入口
 
 - 删除 `#home` 路由与 `home()` 页面（00-app-shell.js），顶栏"⌂ 首页"导航入口同步移除。
