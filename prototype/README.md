@@ -92,6 +92,7 @@ prototype/
 - 经济学原理的 16 周日历种子数据同样在 `19-teaching-calendar.js`（与离散数学种子完全隔离，按课程 id 分 key 存储）；`04-calendar-fidelity.js` 的 `targets` 维护各课程的学时基准（经济学 48 = 讲授 40 + 课程项目 8），新增课程时需同步补充，否则学时会被按离散基准重排。
 - 备课工作台（`27-preparation-workspace.js`）的 MD 教案草稿与学术资料同样按课程 id 分 key 存储（离散数学沿用 `ai-jiaowu-prep-workspace-v4*`，经济学为 `*-economics`）；两门课程各自维护默认教案、默认资料、备课单元切换条与 AI 助手文案，新增课程时需在该模块同步补充默认数据，且文案需避开 `33-economics-course-data.js` 替换层的源词（如“关系”“映射”），避免被二次替换。
 - 支持 `Course-Management.html?course=economics#course/...` 深链直接打开指定课程工作区（不带参数时行为不变）；index-v2.0.html 首页的课程卡片即通过该深链进入对应课程。
+- 课程管理系统的顶部导航栏（品牌/课程管理/资料库/消息提醒/系统设置）已按要求移除，布局高度同步调整（`.layout`/`.side` 改为 100vh）；全局页面（`#courses`/`#materials`/`#notifications`/`#settings`）路由保留，可通过系统首页跳转或直接访问 hash 进入。甲方首页 index-v2.0.html 不受影响。
 - 首页（`#home`）已按要求移除：顶栏不再显示“首页”入口，无 hash 打开与未知路由均回落到课程管理页（`#courses`）。
 - 课程总览（`35-course-overview.js`）为链式接管 overview 路由的独立模块，演示数据刻意与各模块既定事实对齐（大纲 8 区块、日历状态实时读取 localStorage，其余为静态演示数字）；修改其他模块的演示数据时需同步更新该模块的 `COURSES` 配置，避免总览数字与实际页面不一致。
 - 作业管理 v2（`34-assignment-knowledge-base.js`）的题目来源角色与比例配方为模块内静态 Mock；课程总览中展示的题库/知识库计数需与其保持一致口径。
