@@ -11,6 +11,7 @@
             AI教务系统
         </title>
         <link rel="stylesheet" href="css/styles.css?v=20260908-24">
+        <link rel="stylesheet" href="css/materials-library.css?v=20260908-23">
         <style id="app-preload-visibility">#app{visibility:hidden!important}</style>
     </head>
     
@@ -25,6 +26,9 @@
             <nav class="topnav">
                 <a href="#courses" data-global="courses">
                     ▦ 课程管理
+                </a>
+                <a href="#materials" data-global="materials">
+                    ▤ 资料库
                 </a>
                 <a href="#notifications" data-global="notifications">
                     ♢ 消息提醒
@@ -69,8 +73,9 @@
                 if (__courseParam) localStorage.setItem('ai-jiaowu-current-course', __courseParam);
             } catch (e) {}
         </script>
-        <script src="js/core/00-app-shell.js?v=20260910-06">
+        <script src="js/core/00-app-shell.js?v=20260910-05">
         </script>
+        <script src="js/core/04-materials-alignment.js?v=20260908-23">
         </script>
         <script src="js/core/01-demo-store.js?v=20260908-23">
         </script>

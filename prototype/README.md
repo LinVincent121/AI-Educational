@@ -16,7 +16,7 @@
 |---|---|---|---|
 home` | 浅演示 | 课程概览 / 待办 / 异步任务 / 快捷操作 |#home` | 浅演示 | 课程概览 / 待办 / 异步任务 / 快捷操作 |
 | 课程管理 | `#courses` | 深交互 | 当前保留《离散数学》《经济学原理》两门课程；支持直接进入课程浏览、筛选排序与创建课程向导 |
-| 资料库 | `materials.html` | 深演示 | 独立单文件（原 `#materials` 路由已从主原型移除，课程内入口跳转独立文件） |
+| 资料库 | `#materials` | 深演示 | 个人/共享知识空间、上传解析模拟、文件夹管理 |
 | 消息提醒 | `#notifications` | 浅演示 | 待办与已读 |
 | 系统设置 | `#settings` | 深演示 | 校历与周次、权限、模型信息（Mock 模式） |
 | 课程总览 | `#course/overview` | 深演示 | 课程信息 + 初始化状态 + 状态驱动推荐操作 + 待办 + AI 入口 + 最近活动 + 九宫格资产入口（`35-course-overview.js`） |
@@ -55,15 +55,16 @@ home` | 浅演示 | 课程概览 / 待办 / 异步任务 / 快捷操作 |#home` 
 ```text
 prototype/
 ├─ index.html                 # 唯一入口：顶部全局导航 + #app + 全局弹窗壳；加载 core 脚本
-├─ materials.html             # 资料库独立版（自包含单文件：样式与脚本全部内联，可单独分发打开）
 ├─ css/
 │  ├─ styles.css              # 全局设计变量(:root)与通用样式（薄荷绿 + 橙主按钮 + 蓝墨标题）
+│  └─ materials-library.css   # 资料库模块样式
 ├─ js/
 │  ├─ core/
-│  │  ├─ 00-app-shell.js      # render() 路由、课程管理/消息/设置、openAI 弹窗
+│  │  ├─ 00-app-shell.js      # render() 路由、课程管理/资料库/消息/设置、openAI 弹窗
 │  │  ├─ 01-demo-store.js     # demo 数据存储
 │  │  ├─ 02-course-create.js  # 创建课程向导
 │  │  ├─ 03-course-processing.js
+│  │  ├─ 04-materials-alignment.js
 │  │  └─ course-v2-loader.js  # 唯一模块注册表；加载顺序 = 覆盖优先级
 │  └─ modules/                # NN-name.js 业务模块（29 个业务增强 + 新模块放末尾）
 └─ tools/dev-check.mjs        # 语法 + 引用 + window.* 覆盖告警自检
@@ -91,7 +92,6 @@ prototype/
 - 备课工作台（`27-preparation-workspace.js`）的 MD 教案草稿与学术资料同样按课程 id 分 key 存储（离散数学沿用 `ai-jiaowu-prep-workspace-v4*`，经济学为 `*-economics`）；两门课程各自维护默认教案、默认资料、备课单元切换条与 AI 助手文案，新增课程时需在该模块同步补充默认数据，且文案需避开 `33-economics-course-data.js` 替换层的源词（如“关系”“映射”），避免被二次替换。
 - 支持 `index.html?course=economics#course/...` 深链直接打开指定课程工作区（不带参数时行为不变）。
 - 首页（`#home`）已按要求移除：顶栏不再显示“首页”入口，无 hash 打开与未知路由均回落到课程管理页（`#courses`）。
-- 资料库已抽离为独立单文件 `materials.html`（样式与脚本全部内联，可单独分发打开；localStorage 数据与主原型同源共享）；主原型顶栏“资料库”入口与 `#materials` 路由已移除（直达该 hash 回落课程管理），课程总览等页面内的资料库入口改为跳转独立文件，`js/core/04-materials-alignment.js` 与 `css/materials-library.css` 随迁删除。
 - 课程总览（`35-course-overview.js`）为链式接管 overview 路由的独立模块，演示数据刻意与各模块既定事实对齐（大纲 8 区块、日历状态实时读取 localStorage，其余为静态演示数字）；修改其他模块的演示数据时需同步更新该模块的 `COURSES` 配置，避免总览数字与实际页面不一致。
 - 作业管理 v2（`34-assignment-knowledge-base.js`）的题目来源角色与比例配方为模块内静态 Mock；课程总览中展示的题库/知识库计数需与其保持一致口径。
 - `node tools/dev-check.mjs` 中重复 `window.*` 覆盖仅作 WARN，用于提示后续逐步收敛，不影响运行。
