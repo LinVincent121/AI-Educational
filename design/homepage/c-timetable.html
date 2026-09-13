@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EduWork · 首页 — 方向C 今日课表</title>
+<style>
+  /* ============ 方向C · 今日课表 Timetable Scholar ============
+     纸面 + 板书绿 + 楷体问候；签名元素：把“从哪开始”排成一张当日课程表
+     教学工作流即课表条目：第几节做什么，成稿落到哪个工作台 */
+  :root{
+    --paper:#faf8f3; --paper-deep:#f2eee3; --surface:#ffffff;
+    --line:#e5dfd2; --line-strong:#d8d2c2;
+    --chalk:#2f6b4f; --chalk-deep:#255741; --chalk-soft:#e9f1ec;
+    --ink:#22304a; --muted:#6d7688; --faint:#a0a7b5;
+    --amber:#a86a08; --amber-soft:#f7efdd;
+    --indigo:#4a5fa5; --indigo-soft:#edf0f9;
+    --plum:#7c5cb0; --plum-soft:#f1ecf8;
+    --rose:#b0526d; --rose-soft:#f9ecf0;
+    --teal:#14707f; --teal-soft:#e6f2f4;
+    --kai:Georgia,"KaiTi","楷体","STKaiti","Microsoft YaHei",serif;
+    --sans:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:var(--sans);font-size:14px;line-height:1.6;color:var(--ink);background:var(--paper)}
+  button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+  button:focus-visible,textarea:focus-visible{outline:2px solid var(--chalk);outline-offset:2px}
+  .app{display:grid;grid-template-columns:256px 1fr;height:100vh;overflow:hidden}
+
+  /* ---------- 左侧栏：备课本式 ---------- */
+  .c-side{background:var(--paper-deep);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:18px 12px 12px;overflow-y:auto}
+  .brand{display:flex;align-items:center;gap:10px;padding:2px 8px 14px}
+  .brand-mark{width:34px;height:34px;border-radius:8px;background:var(--chalk);display:grid;place-items:center;flex:none}
+  .brand b{font-size:17px;letter-spacing:.01em}
+  .brand small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;color:var(--muted);font-weight:400}
+  .nav{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+  .nav-btn{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:14px;color:var(--muted);text-align:left;transition:all .15s}
+  .nav-btn:hover{color:var(--ink);background:rgba(255,255,255,.55)}
+  .nav-btn.on{background:var(--surface);color:var(--chalk-deep);font-weight:600;box-shadow:inset 3px 0 0 var(--chalk),0 1px 3px rgba(34,48,74,.06)}
+  .new-btn{margin:10px 4px 0;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:8px;background:var(--chalk);color:#fff;font-size:13.5px;font-weight:600;transition:background .12s}
+  .new-btn:hover{background:var(--chalk-deep)}
+  .side-label{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--faint);padding:16px 10px 6px}
+  .hist{display:flex;flex-direction:column;gap:1px}
+  .hist-item{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:7px;font-size:13px;color:var(--muted);text-align:left;white-space:nowrap;overflow:hidden}
+  .hist-item:hover{background:rgba(255,255,255,.7);color:var(--ink)}
+  .hist-item svg{flex:none;opacity:.55}
+  .hist-item .t{font-family:var(--mono);font-size:10px;color:var(--faint);margin-left:auto;flex:none}
+  .side-foot{margin-top:auto;border-top:1px solid var(--line);padding-top:12px;display:flex;align-items:center;gap:10px;padding-left:6px}
+  .avatar{width:32px;height:32px;border-radius:8px;background:var(--chalk);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px;flex:none}
+  .side-foot b{font-size:13px;display:block;line-height:1.3}
+  .side-foot span{font-size:11.5px;color:var(--muted)}
+  .gear{margin-left:auto;padding:6px;border-radius:7px;color:var(--muted)}
+  .gear:hover{background:rgba(255,255,255,.7);color:var(--ink)}
+
+  /* ---------- 主区 ---------- */
+  .c-main{overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:56px 32px 48px;scrollbar-width:thin}
+  .hero{width:100%;max-width:860px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--chalk)}
+  h1{font-family:var(--kai);font-size:36px;font-weight:700;margin:10px 0 8px;letter-spacing:.02em}
+  .hero-sub{font-size:14.5px;color:var(--muted);min-height:24px}
+
+  .tabs{display:flex;justify-content:center;gap:8px;margin:26px 0 8px;border-bottom:1px solid var(--line)}
+  .tab-btn{padding:9px 26px 10px;font-size:15px;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px;transition:color .15s}
+  .tab-btn:hover{color:var(--ink)}
+  .tab-btn.on{color:var(--chalk-deep);font-weight:700;border-bottom-color:var(--chalk)}
+  .mode-desc{text-align:center;font-size:12.5px;color:var(--muted);margin-bottom:20px;min-height:20px}
+  .mode-desc b{color:var(--chalk-deep);font-weight:600}
+
+  /* 输入框：纸面卡片 */
+  .inputbox{background:var(--surface);border:1.5px solid var(--line-strong);border-radius:12px;padding:16px 16px 10px;transition:border-color .15s,box-shadow .15s}
+  .inputbox:focus-within{border-color:var(--chalk);box-shadow:0 6px 18px rgba(47,107,79,.1)}
+  .inputbox textarea{width:100%;border:none;outline:none;resize:none;background:transparent;font-family:var(--sans);font-size:15px;line-height:1.6;min-height:64px;color:var(--ink)}
+  .inputbox textarea::placeholder{color:var(--faint)}
+  .inputbar{display:flex;align-items:center;gap:8px;margin-top:6px}
+  .chip-tool{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11.5px;color:var(--muted);border:1px solid var(--line);border-radius:7px;padding:5px 10px;background:var(--paper);transition:all .12s}
+  .chip-tool:hover{border-color:var(--chalk);color:var(--chalk-deep)}
+  .spacer{flex:1}
+  .icon-btn{display:grid;place-items:center;width:32px;height:32px;border-radius:7px;color:var(--muted)}
+  .icon-btn:hover{background:var(--paper);color:var(--ink)}
+  .send{width:36px;height:36px;border-radius:8px;background:var(--chalk);color:#fff;display:grid;place-items:center;transition:background .12s,transform .12s}
+  .send:hover{background:var(--chalk-deep);transform:translateY(-1px)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .chip{border:1px solid var(--line);border-radius:7px;padding:6px 13px;font-size:13px;color:var(--muted);background:var(--surface);transition:all .12s}
+  .chip:hover{border-color:var(--chalk);color:var(--chalk-deep);background:var(--chalk-soft)}
+
+  /* ---- 签名：今日课表 ---- */
+  .section{width:100%;max-width:860px;margin-top:42px}
+  .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .sec-head .eyebrow{color:var(--muted)}
+  .sec-head::after{content:"";flex:1;height:1px;background:var(--line)}
+  .tt{background:var(--surface);border:1px solid var(--line-strong);border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(34,48,74,.05)}
+  .tt-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--chalk);color:#fff}
+  .tt-head b{font-family:var(--kai);font-size:16.5px;letter-spacing:.04em}
+  .tt-head span{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;opacity:.85}
+  .tt-row{display:grid;grid-template-columns:92px 1fr;border-top:1px solid var(--line)}
+  .tt-row:first-of-type{border-top:none}
+  .tt-time{padding:14px 12px;text-align:center;border-right:1px dashed var(--line);display:flex;flex-direction:column;justify-content:center;gap:2px;background:var(--paper)}
+  .tt-time b{font-family:var(--kai);font-size:14.5px;color:var(--ink)}
+  .tt-time span{font-family:var(--mono);font-size:10px;color:var(--faint)}
+  .tt-cells{display:grid;grid-template-columns:1fr;gap:0}
+  .tt-cells.two{grid-template-columns:1fr 1fr}
+  .cell{display:flex;align-items:center;gap:12px;padding:13px 16px;text-align:left;border-left:3px solid transparent;transition:background .12s}
+  .cell:hover{background:var(--paper)}
+  .cell .name{flex:1;min-width:0}
+  .cell .name b{font-size:14.5px;display:block}
+  .cell .name span{font-size:12px;color:var(--muted)}
+  .cell .dest{font-family:var(--mono);font-size:10.5px;color:var(--muted);flex:none;opacity:0;transform:translateX(-4px);transition:all .15s}
+  .cell:hover .dest{opacity:1;transform:none}
+  .cell + .cell{border-left-style:solid}
+  .c-syl{background:var(--chalk-soft);border-left-color:var(--chalk)} .c-syl:hover{background:#e2ede7}
+  .c-cal{background:var(--amber-soft);border-left-color:var(--amber)} .c-cal:hover{background:#f4ead2}
+  .c-prep{background:var(--indigo-soft);border-left-color:var(--indigo)} .c-prep:hover{background:#e6eaf6}
+  .c-cw{background:var(--plum-soft);border-left-color:var(--plum)} .c-cw:hover{background:#ebe4f5}
+  .c-hw{background:var(--rose-soft);border-left-color:var(--rose)} .c-hw:hover{background:#f6e3e9}
+  .c-exam{background:var(--teal-soft);border-left-color:var(--teal)} .c-exam:hover{background:#ddecef}
+  .tt-row.noon .tt-time b{color:var(--muted);font-weight:400}
+
+  /* 问答卡（对话模式） */
+  .grid-chat{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .qa{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;text-align:left;position:relative;transition:transform .15s,box-shadow .15s}
+  .qa:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(34,48,74,.08)}
+  .qa .q{font-family:var(--kai);font-size:15px;font-weight:700;display:block;margin-bottom:4px}
+  .qa p{font-size:12.5px;color:var(--muted)}
+  .qa .mark{position:absolute;top:12px;right:14px;font-family:var(--kai);font-size:20px;color:var(--line-strong);line-height:1}
+  .qa:hover .mark{color:var(--chalk)}
+
+  /* 作业收发（任务模式） */
+  .hw-list{display:flex;flex-direction:column;gap:10px}
+  .hw{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 18px;text-align:left;transition:border-color .15s,box-shadow .15s}
+  .hw:hover{border-color:var(--chalk);box-shadow:0 6px 16px rgba(34,48,74,.07)}
+  .hw .body{flex:1;min-width:0}
+  .hw b{display:block;font-size:14px}
+  .hw span{font-size:12.5px;color:var(--muted)}
+  .prog{margin-top:8px;height:5px;border-radius:99px;background:var(--paper-deep);overflow:hidden}
+  .prog i{display:block;height:100%;border-radius:99px;background:var(--chalk)}
+  .stamp{flex:none;font-family:var(--kai);font-size:12.5px;font-weight:700;border:1.5px solid;border-radius:6px;padding:3px 9px;transform:rotate(-4deg)}
+  .stamp.run{color:var(--chalk);border-color:var(--chalk);background:var(--chalk-soft)}
+  .stamp.queue{color:var(--muted);border-color:var(--line-strong);background:var(--paper)}
+  .stamp.done{color:var(--amber);border-color:var(--amber);background:var(--amber-soft)}
+
+  .concept-tag{position:fixed;right:16px;bottom:14px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--faint);background:rgba(255,255,255,.88);border:1px solid var(--line);border-radius:7px;padding:5px 10px;z-index:5;text-decoration:none}
+  .concept-tag:hover{color:var(--chalk-deep)}
+  .toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,16px);background:var(--ink);color:#fff;font-size:13px;border-radius:9px;padding:10px 18px;opacity:0;pointer-events:none;transition:all .25s;z-index:9;max-width:80vw;text-align:center}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+
+  @media (max-width:960px){
+    .app{grid-template-columns:1fr}
+    .c-side{display:none}
+    h1{font-size:29px}
+    .tt-cells.two{grid-template-columns:1fr}
+    .cell + .cell{border-top:1px dashed var(--line)}
+  }
+  @media (max-width:620px){.grid-chat{grid-template-columns:1fr}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ================= 左侧栏 ================= -->
+  <aside class="c-side">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="4"/></svg>
+      </div>
+      <div><b>EduWork</b><small>教育版 · EDU</small></div>
+    </div>
+
+    <nav class="nav" id="sideNav">
+      <button class="nav-btn on" data-mode="chat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/><path d="M9 11h6M9 15h3"/></svg>对话</button>
+      <button class="nav-btn" data-mode="task"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/></svg>任务</button>
+      <button class="nav-btn" data-mode="teach"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18M8 14h3M13 14h3M8 17h3"/></svg>教学</button>
+    </nav>
+    <button class="new-btn" id="newBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>新的对话</button>
+
+    <div class="side-label">最近 / RECENT</div>
+    <div class="hist">
+      <button class="hist-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/></svg>供求模型课堂讨论提纲<span class="t">10:24</span></button>
+      <button class="hist-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/></svg>批改第 3 周作业（92 份）<span class="t">09:41</span></button>
+      <button class="hist-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18"/></svg>《经济学原理》大纲 v3<span class="t">昨天</span></button>
+      <button class="hist-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/></svg>弹性概念的三种讲法<span class="t">昨天</span></button>
+      <button class="hist-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/></svg>期中卷审校与难度复核<span class="t">周二</span></button>
+      <button class="hist-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18"/></svg>教学日历 · 9 月排课调整<span class="t">周一</span></button>
+    </div>
+
+    <div class="side-foot">
+      <div class="avatar">林</div>
+      <div><b>林老师</b><span>经济学院 · 讲师</span></div>
+      <button class="gear" aria-label="设置"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h0a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h0a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v0a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></button>
+    </div>
+  </aside>
+
+  <!-- ================= 主区 ================= -->
+  <main class="c-main">
+    <div class="hero">
+      <div class="eyebrow">2026-09-10 · 星期四 · 第 2 教学周 · 教师节</div>
+      <h1>早上好，林老师</h1>
+      <p class="hero-sub" id="heroSub">今晚记得备《供求模型》的课——其余的，先从下面这张表开始。</p>
+
+      <div class="tabs" role="tablist" aria-label="模式切换">
+        <button class="tab-btn on" data-mode="chat" role="tab" aria-selected="true">对话</button>
+        <button class="tab-btn" data-mode="task" role="tab" aria-selected="false">任务</button>
+        <button class="tab-btn" data-mode="teach" role="tab" aria-selected="false">教学</button>
+      </div>
+      <p class="mode-desc" id="modeDesc"><b>对话</b> · 有问必答，像同事间的随口一问</p>
+
+      <div class="inputbox">
+        <textarea id="input" placeholder="比如：用奶茶店的例子，给大一学生讲清“机会成本”" aria-label="输入框"></textarea>
+        <div class="inputbar">
+          <button class="chip-tool">EduWork-4.5 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></button>
+          <button class="chip-tool">✦ 深度思考</button>
+          <div class="spacer"></div>
+          <button class="icon-btn" aria-label="附件"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21.4 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+          <button class="send" id="send" aria-label="发送"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+        </div>
+      </div>
+
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <!-- 对话：问答卡 -->
+    <section class="section" id="sec-chat">
+      <div class="sec-head"><span class="eyebrow">常被问起 / Q&A</span></div>
+      <div class="grid-chat">
+        <button class="qa"><span class="mark">问</span><span class="q">“机会成本”怎么讲才不抽象？</span><p>用奶茶店排队的例子展开，配 2 个课堂提问</p></button>
+        <button class="qa"><span class="mark">问</span><span class="q">讲义太长，学生看不进去怎么办？</span><p>3000 字讲义压成一页复习提纲，保留考点</p></button>
+        <button class="qa"><span class="mark">问</span><span class="q">明天随堂小测出什么题？</span><p>按知识点与难度出题，附答案与解析</p></button>
+        <button class="qa"><span class="mark">问</span><span class="q">期中前怎么动员学生复习？</span><p>写一封语气真诚的复习动员邮件</p></button>
+      </div>
+    </section>
+
+    <!-- 任务：作业收发处 -->
+    <section class="section" id="sec-task" hidden>
+      <div class="sec-head"><span class="eyebrow">作业收发处 / TASKS</span></div>
+      <div class="hw-list">
+        <button class="hw"><div class="body"><b>批改《经济学原理》第 3 周作业</b><span>78 / 92 份 · 预计还需 10 分钟 · 完成后自动生成讲评</span><div class="prog"><i style="width:85%"></i></div></div><span class="stamp run">进行中</span></button>
+        <button class="hw"><div class="body"><b>“宏观经济”文献整理入资料库</b><span>24 篇中已解析 10 篇 · 提取观点与出处</span><div class="prog"><i style="width:42%"></i></div></div><span class="stamp run">进行中</span></button>
+        <button class="hw"><div class="body"><b>第 4 章题库生成（30 题）</b><span>排队中 · 预计今晚 21:00 开始</span></div><span class="stamp queue">排队中</span></button>
+        <button class="hw"><div class="body"><b>第 1 周学情周报</b><span>已生成 · 含易错点与下次课建议</span></div><span class="stamp done">已收 ✓</span></button>
+      </div>
+    </section>
+
+    <!-- 教学：今日课表（签名元素） -->
+    <section class="section" id="sec-teach" hidden>
+      <div class="sec-head"><span class="eyebrow">今日课表 / 从哪一节开始</span></div>
+      <div class="tt">
+        <div class="tt-head"><b>教学工作流 · 星期四</b><span>AI 生成初稿 → 工作台精修</span></div>
+        <div class="tt-row">
+          <div class="tt-time"><b>第 1 节</b><span>08:30</span></div>
+          <div class="tt-cells"><button class="cell c-syl" data-dest="教学大纲工作台"><span class="name"><b>教学大纲</b><span>一句话起草 16 周大纲，含学时与考核</span></span><span class="dest">去大纲页 →</span></button></div>
+        </div>
+        <div class="tt-row">
+          <div class="tt-time"><b>第 2 节</b><span>10:20</span></div>
+          <div class="tt-cells"><button class="cell c-cal" data-dest="教学日历"><span class="name"><b>教学日历</b><span>按学期周历与节假日智能排课</span></span><span class="dest">去日历页 →</span></button></div>
+        </div>
+        <div class="tt-row noon">
+          <div class="tt-time"><b>午 间</b><span>12:00</span></div>
+          <div class="tt-cells"><button class="cell c-prep" data-dest="备课工作台"><span class="name"><b>备课工作台</b><span>生成教案初稿，自动匹配学术资料</span></span><span class="dest">去备课页 →</span></button></div>
+        </div>
+        <div class="tt-row">
+          <div class="tt-time"><b>第 3 节</b><span>14:00</span></div>
+          <div class="tt-cells"><button class="cell c-cw" data-dest="课件生成工作台"><span class="name"><b>课件制作</b><span>从大纲章节生成可编辑的课件</span></span><span class="dest">去课件页 →</span></button></div>
+        </div>
+        <div class="tt-row">
+          <div class="tt-time"><b>晚自习</b><span>19:00</span></div>
+          <div class="tt-cells two">
+            <button class="cell c-hw" data-dest="作业知识库"><span class="name"><b>作业知识库</b><span>历史题目结构化入库</span></span><span class="dest">入库 →</span></button>
+            <button class="cell c-exam" data-dest="试卷管理"><span class="name"><b>试卷组卷</b><span>按知识点与难度智能组卷</span></span><span class="dest">组卷 →</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<a class="concept-tag" href="index.html">← 方向C · 今日课表 Timetable · 设计概念稿</a>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  var MODES = {
+    chat:{
+      desc:'<b>对话</b> · 有问必答，像同事间的随口一问',
+      sub:'今晚记得备《供求模型》的课——其余的，问我就行。',
+      ph:'比如：用奶茶店的例子，给大一学生讲清“机会成本”',
+      chips:['把讲义压成一页复习提纲','按 Bloom 分级出 10 道选择题','写期中复习动员邮件','翻译英文摘要'],
+      toast:'演示：进入对话，生成结果直接展示在对话中'
+    },
+    task:{
+      desc:'<b>任务</b> · 交给 AI 跑全程，收发像交作业一样简单',
+      sub:'批改、整理、汇总——交出去，等结果就好。',
+      ph:'比如：批改《经济学原理》第 3 周作业（92 份），完成后生成讲评',
+      chips:['整理宏观文献 24 篇入资料库','生成第 4 章题库 30 题','汇总本周学情周报','导出第 2 周点名名单'],
+      toast:'演示：创建异步任务，进度在首页与侧栏实时更新'
+    },
+    teach:{
+      desc:'<b>教学</b> · 今天想推进哪一节？按课表开始',
+      sub:'今晚记得备《供求模型》的课——其余的，先从下面这张表开始。',
+      ph:'比如：为《经济学原理》生成 16 周教学大纲，两周一次测验',
+      chips:['生成 16 周教学大纲','排本学期教学日历','写第 3 周教案','制作“供求模型”课件'],
+      toast:'演示：AI 在对话中生成初稿，完成后一键进入对应教学页面编辑'
+    }
+  };
+  var cur='chat';
+  var $=function(s){return document.querySelector(s)};
+  var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+  var input=$('#input'), toast=$('#toast'), timer=null;
+
+  function showToast(msg){
+    toast.textContent=msg; toast.classList.add('show');
+    clearTimeout(timer); timer=setTimeout(function(){toast.classList.remove('show')},2600);
+  }
+  function renderChips(m){
+    var box=$('#chips'); box.innerHTML='';
+    MODES[m].chips.forEach(function(c){
+      var b=document.createElement('button');
+      b.className='chip'; b.textContent=c;
+      b.onclick=function(){input.value=c; input.focus();};
+      box.appendChild(b);
+    });
+  }
+  function setMode(m){
+    cur=m;
+    $$('.tab-btn,.nav-btn').forEach(function(b){
+      var on=b.dataset.mode===m;
+      b.classList.toggle('on',on);
+      if(b.getAttribute('role')==='tab') b.setAttribute('aria-selected',on);
+    });
+    $('#heroSub').textContent=MODES[m].sub;
+    $('#modeDesc').innerHTML=MODES[m].desc;
+    input.placeholder=MODES[m].ph;
+    $('#sec-chat').hidden = m!=='chat';
+    $('#sec-task').hidden = m!=='task';
+    $('#sec-teach').hidden = m!=='teach';
+    renderChips(m);
+  }
+  $$('.tab-btn,.nav-btn').forEach(function(b){ b.onclick=function(){setMode(b.dataset.mode)} });
+  $('#send').onclick=function(){
+    if(!input.value.trim()){ input.focus(); return; }
+    showToast(MODES[cur].toast); input.value='';
+  };
+  input.addEventListener('keydown',function(e){
+    if(e.key==='Enter' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); $('#send').click(); }
+  });
+  $$('#sec-teach .cell').forEach(function(c){
+    c.onclick=function(){ showToast('演示：AI 生成初稿后，进入「'+c.dataset.dest+'」编辑（沿用现有界面）'); };
+  });
+  $('#newBtn').onclick=function(){ setMode('chat'); input.focus(); showToast('演示：开启新对话'); };
+  setMode('chat');
+})();
+</script>
+</body>
+</html>

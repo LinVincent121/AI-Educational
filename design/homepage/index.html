@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EduWork 首页设计 · 方向对比</title>
+<style>
+  :root{
+    --bg:#f6fafa; --surface:#ffffff; --line:#e3eef0;
+    --mint:#16bda8; --mint-deep:#0b9c8c; --mint-ink:#087c72; --mint-soft:#e6f8f4;
+    --ink:#18364f; --muted:#6c8495;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.6; padding:48px 24px 64px;
+  }
+  .wrap{max-width:960px;margin:0 auto}
+  .eyebrow{
+    font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mint-deep);
+  }
+  h1{font-family:Georgia,"Microsoft YaHei",serif;font-size:30px;font-weight:700;margin:8px 0 6px}
+  .lead{color:var(--muted);font-size:15px;max-width:720px}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px 28px;margin-top:28px}
+  .panel h2{font-size:16px;margin-bottom:4px}
+  .panel .sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  .mode{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:#fbfdfd}
+  .mode b{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mint-ink)}
+  .mode p{font-size:13px;color:var(--muted);margin-top:6px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:4px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line)}
+  th{font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.1em;color:var(--muted);font-weight:600}
+  td code{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--mint-ink);background:var(--mint-soft);border-radius:5px;padding:2px 7px}
+  .variants{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px;margin-top:8px}
+  .v{display:block;text-decoration:none;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:transform .15s ease, box-shadow .15s ease}
+  .v:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(54,113,126,.12)}
+  .v .thumb{height:120px;display:flex;align-items:center;justify-content:center;gap:10px}
+  .v .thumb .mini-side{width:26%;height:82%;border-radius:6px 0 0 6px}
+  .v .thumb .mini-main{width:56%;height:82%;border-radius:0 6px 6px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+  .v .thumb .bar{height:7px;border-radius:99px}
+  .v .body{padding:16px 18px 18px;border-top:1px solid var(--line)}
+  .v .body .tag{font-family:ui-monospace,Consolas,monospace;font-size:10.5px;letter-spacing:.12em;color:var(--muted)}
+  .v .body b{display:block;font-size:16px;margin:3px 0 5px}
+  .v .body p{font-size:13px;color:var(--muted)}
+  .swatches{display:flex;gap:6px;margin-top:12px}
+  .sw{width:22px;height:22px;border-radius:6px;border:1px solid rgba(0,0,0,.08)}
+  .note{margin-top:26px;font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:14px}
+  @media (prefers-reduced-motion:reduce){.v{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">EduWork · Homepage Concepts · 2026-09-10</div>
+  <h1>EduWork 首页：三个设计方向</h1>
+  <p class="lead">教育版 WorkBuddy。首页承载「对话 / 任务 / 教学」三大模式；教学模块沿用现有工作台界面，首页只做新入口——AI 在对话中生成初稿，成稿一键进入对应教学页面编辑。</p>
+
+  <div class="panel">
+    <h2>模式规划</h2>
+    <p class="sub">三种模式共用一个输入框与侧栏历史，切换的是"AI 的工作方式"。</p>
+    <div class="modes">
+      <div class="mode"><b>💬 对话</b><p>即问即答：概念讲解、内容改写、随堂出题、教学文案，答案留在对话里。</p></div>
+      <div class="mode"><b>✅ 任务</b><p>异步执行：批改作业、整理文献、汇总学情等多步骤工作后台完成，进度在首页与侧栏可查。</p></div>
+      <div class="mode"><b>🎓 教学</b><p>教育工作流入口：一句话生成初稿，成稿落到教学大纲、日历、备课、课件等现有工作台精修。</p></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>教学入口 → 落地页面（界面不变，仅入口变化）</h2>
+    <p class="sub">首页生成的内容最终都进入现有原型页面完成编辑与浏览。</p>
+    <table>
+      <tr><th>首页入口</th><th>生成方式</th><th>落地页面（现有界面）</th></tr>
+      <tr><td>教学大纲</td><td>对话生成 16 周大纲初稿</td><td>教学大纲工作台 <code>#course/syllabus</code></td></tr>
+      <tr><td>教学日历</td><td>按学期周历智能排课</td><td>教学日历 <code>#course/calendar</code></td></tr>
+      <tr><td>备课工作台</td><td>生成教案初稿 + 匹配资料</td><td>备课工作台 <code>#course/preparation</code></td></tr>
+      <tr><td>课件制作</td><td>从大纲章节生成课件</td><td>课件生成工作台 <code>#course/courseware</code></td></tr>
+      <tr><td>作业知识库</td><td>历史题目结构化入库</td><td>作业知识库 <code>#course/assignment</code></td></tr>
+      <tr><td>试卷组卷</td><td>按知识点 / 难度智能组卷</td><td>试卷管理 <code>#course/exam</code></td></tr>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>三个风格方向</h2>
+    <p class="sub">均保留 WorkBuddy 的结构骨架（左侧栏 + 居中问候 + 模式切换 + 大输入框 + 快捷卡片），可在页内真实切换三种模式。</p>
+    <div class="variants">
+      <a class="v" href="a-mint-academia.html">
+        <div class="thumb" style="background:#f6fafa">
+          <div class="mini-side" style="background:#fff;border:1px solid #e3eef0"></div>
+          <div class="mini-main" style="background:#fff;border:1px solid #e3eef0">
+            <div class="bar" style="width:60%;background:#e6f8f4"></div>
+            <div class="bar" style="width:84%;height:22px;background:#16bda8;opacity:.85"></div>
+            <div class="bar" style="width:40%;background:#e3eef0"></div>
+          </div>
+        </div>
+        <div class="body">
+          <span class="tag">方向 A</span><b>青樟 · 与现有系统同语言</b>
+          <p>延续原型薄荷绿 + 衬线标题的学术气质，首页与教学工作台浑然一体，改造成本最低。</p>
+          <div class="swatches">
+            <div class="sw" style="background:#16bda8"></div><div class="sw" style="background:#0b9c8c"></div>
+            <div class="sw" style="background:#18364f"></div><div class="sw" style="background:#e6f8f4"></div>
+            <div class="sw" style="background:#ff8f63"></div>
+          </div>
+        </div>
+      </a>
+      <a class="v" href="b-workbuddy.html">
+        <div class="thumb" style="background:#f6fafa">
+          <div class="mini-side" style="background:#fff;border:1px solid #e3eef0"></div>
+          <div class="mini-main" style="background:#fff;border:1px solid #e3eef0;box-shadow:0 6px 14px rgba(24,54,79,.08)">
+            <div class="bar" style="width:70%;background:#e6f8f4"></div>
+            <div class="bar" style="width:88%;height:22px;background:#16bda8;border-radius:12px"></div>
+            <div class="bar" style="width:44%;background:#e3eef0"></div>
+          </div>
+        </div>
+        <div class="body">
+          <span class="tag">方向 B · ✓ 当前选定</span><b>EduWork · WorkBuddy 同源 × 薄荷绿</b>
+          <p>结构复刻 WorkBuddy，配色切换为现有系统薄荷绿；已按反馈迭代：侧栏区块导航（新建任务 / 专家·技能 / 资料库 / 消息提醒）、去除模式说明文案。</p>
+          <div class="swatches">
+            <div class="sw" style="background:#16bda8"></div><div class="sw" style="background:#0b9c8c"></div>
+            <div class="sw" style="background:#18364f"></div><div class="sw" style="background:#e6f8f4"></div>
+            <div class="sw" style="background:#ff8f63"></div>
+          </div>
+        </div>
+      </a>
+      <a class="v" href="c-timetable.html">
+        <div class="thumb" style="background:#faf8f3">
+          <div class="mini-side" style="background:#f1ede2;border:1px solid #e5dfd2"></div>
+          <div class="mini-main" style="background:#fff;border:1px solid #e5dfd2">
+            <div class="bar" style="width:64%;background:#eee8da"></div>
+            <div class="bar" style="width:80%;height:18px;background:#2f6b4f;opacity:.9"></div>
+            <div class="bar" style="width:80%;height:9px;background:#eee8da"></div>
+            <div class="bar" style="width:58%;height:9px;background:#a86a08;opacity:.7"></div>
+          </div>
+        </div>
+        <div class="body">
+          <span class="tag">方向 C</span><b>今日课表 · 教育原生</b>
+          <p>纸面 + 板书绿 + 楷体问候，把"从哪开始"排成一张当日课程表，最具校园记忆点、差异最大。</p>
+          <div class="swatches">
+            <div class="sw" style="background:#2f6b4f"></div><div class="sw" style="background:#22304a"></div>
+            <div class="sw" style="background:#faf8f3"></div><div class="sw" style="background:#147d8c"></div>
+            <div class="sw" style="background:#a86a08"></div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <p class="note">概念稿说明：三页均为纯静态 HTML（无外部依赖，双击即开），模式切换 / 快捷标签 / 点击反馈已做成真实交互；落地跳转在概念稿中以提示说明，正式版将接入 <code style="font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--mint-ink)">prototype/index.html</code> 的 hash 路由。演示数据沿用原型中的林老师与《经济学原理》课程。</p>
+</div>
+</body>
+</html>
